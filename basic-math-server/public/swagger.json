@@ -1,0 +1,243 @@
+{
+	"components": {
+		"examples": {},
+		"headers": {},
+		"parameters": {},
+		"requestBodies": {},
+		"responses": {},
+		"schemas": {
+			"GlobalResponse_number_": {
+				"properties": {
+					"result": {
+						"type": "number",
+						"format": "double"
+					},
+					"error": {
+						"type": "boolean"
+					},
+					"message": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"result",
+					"error",
+					"message"
+				],
+				"type": "object"
+			},
+			"AddBody": {
+				"properties": {
+					"numbers": {
+						"items": {
+							"type": "number",
+							"format": "double"
+						},
+						"type": "array"
+					}
+				},
+				"required": [
+					"numbers"
+				],
+				"type": "object"
+			},
+			"DecreaseBody": {
+				"properties": {
+					"value": {
+						"type": "number",
+						"format": "double"
+					},
+					"from": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": [
+					"value",
+					"from"
+				],
+				"type": "object"
+			},
+			"MultiplyBody": {
+				"properties": {
+					"numbers": {
+						"items": {
+							"type": "number",
+							"format": "double"
+						},
+						"type": "array"
+					}
+				},
+				"required": [
+					"numbers"
+				],
+				"type": "object"
+			},
+			"DivideBody": {
+				"properties": {
+					"by": {
+						"type": "number",
+						"format": "double"
+					},
+					"value": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": [
+					"by",
+					"value"
+				],
+				"type": "object"
+			}
+		},
+		"securitySchemes": {}
+	},
+	"info": {
+		"title": "basic-math-server",
+		"version": "0.0.1",
+		"description": "an api for doing basic math works",
+		"license": {
+			"name": "ISC"
+		},
+		"contact": {
+			"name": "a.tanoomandian"
+		}
+	},
+	"openapi": "3.0.0",
+	"paths": {
+		"/basic/plus": {
+			"post": {
+				"operationId": "Add",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/GlobalResponse_number_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Math"
+				],
+				"security": [],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/AddBody"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/basic/minus": {
+			"post": {
+				"operationId": "Decrease",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/GlobalResponse_number_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Math"
+				],
+				"security": [],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/DecreaseBody"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/basic/multiply": {
+			"post": {
+				"operationId": "Multiply",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/GlobalResponse_number_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Math"
+				],
+				"security": [],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/MultiplyBody"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/basic/divide": {
+			"post": {
+				"operationId": "Divide",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/GlobalResponse_number_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Math"
+				],
+				"security": [],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/DivideBody"
+							}
+						}
+					}
+				}
+			}
+		}
+	},
+	"servers": [
+		{
+			"url": "/"
+		}
+	]
+}

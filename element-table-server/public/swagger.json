@@ -1,0 +1,417 @@
+{
+	"components": {
+		"examples": {},
+		"headers": {},
+		"parameters": {},
+		"requestBodies": {},
+		"responses": {},
+		"schemas": {
+			"Pick_TableElement.Exclude_keyofTableElement.image__": {
+				"properties": {
+					"number": {
+						"type": "number",
+						"format": "double"
+					},
+					"symbol": {
+						"type": "string"
+					},
+					"name": {
+						"type": "string"
+					},
+					"appearance": {
+						"type": "string",
+						"nullable": true
+					},
+					"atomic_mass": {
+						"type": "number",
+						"format": "double"
+					},
+					"boil": {
+						"type": "number",
+						"format": "double",
+						"nullable": true
+					},
+					"category": {
+						"type": "string"
+					},
+					"density": {
+						"type": "number",
+						"format": "double",
+						"nullable": true
+					},
+					"discovered_by": {
+						"type": "string",
+						"nullable": true
+					},
+					"melt": {
+						"type": "number",
+						"format": "double",
+						"nullable": true
+					},
+					"molar_heat": {
+						"type": "number",
+						"format": "double",
+						"nullable": true
+					},
+					"named_by": {
+						"type": "string",
+						"nullable": true
+					},
+					"period": {
+						"type": "number",
+						"format": "double"
+					},
+					"phase": {
+						"type": "string"
+					},
+					"source": {
+						"type": "string"
+					},
+					"bohr_model_image": {
+						"type": "string",
+						"nullable": true
+					},
+					"bohr_model_3d": {
+						"type": "string",
+						"nullable": true
+					},
+					"spectral_img": {
+						"type": "string",
+						"nullable": true
+					},
+					"summary": {
+						"type": "string"
+					},
+					"xpos": {
+						"type": "number",
+						"format": "double"
+					},
+					"ypos": {
+						"type": "number",
+						"format": "double"
+					},
+					"shells": {
+						"items": {
+							"type": "number",
+							"format": "double"
+						},
+						"type": "array"
+					},
+					"electron_configuration": {
+						"type": "string"
+					},
+					"electron_configuration_semantic": {
+						"type": "string"
+					},
+					"electron_affinity": {
+						"type": "number",
+						"format": "double",
+						"nullable": true
+					},
+					"electronegativity_pauling": {
+						"type": "number",
+						"format": "double",
+						"nullable": true
+					},
+					"ionization_energies": {
+						"items": {
+							"type": "number",
+							"format": "double"
+						},
+						"type": "array"
+					},
+					"cpk-hex": {
+						"type": "string",
+						"nullable": true
+					}
+				},
+				"required": [
+					"number",
+					"symbol",
+					"name",
+					"appearance",
+					"atomic_mass",
+					"boil",
+					"category",
+					"density",
+					"discovered_by",
+					"melt",
+					"molar_heat",
+					"named_by",
+					"period",
+					"phase",
+					"source",
+					"bohr_model_image",
+					"bohr_model_3d",
+					"spectral_img",
+					"summary",
+					"xpos",
+					"ypos",
+					"shells",
+					"electron_configuration",
+					"electron_configuration_semantic",
+					"electron_affinity",
+					"electronegativity_pauling",
+					"ionization_energies",
+					"cpk-hex"
+				],
+				"type": "object",
+				"description": "From T, pick a set of properties whose keys are in the union K"
+			},
+			"Omit_TableElement.image_": {
+				"$ref": "#/components/schemas/Pick_TableElement.Exclude_keyofTableElement.image__",
+				"description": "Construct a type with the properties of T except for those in type K."
+			},
+			"GlobalResponse_Omit_TableElement.image__": {
+				"properties": {
+					"result": {
+						"$ref": "#/components/schemas/Omit_TableElement.image_"
+					},
+					"error": {
+						"type": "boolean",
+						"example": false
+					},
+					"message": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"result",
+					"error",
+					"message"
+				],
+				"type": "object"
+			},
+			"GlobalResponse____": {
+				"properties": {
+					"result": {
+						"properties": {},
+						"type": "object"
+					},
+					"error": {
+						"type": "boolean",
+						"example": false
+					},
+					"message": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"result",
+					"error",
+					"message"
+				],
+				"type": "object"
+			},
+			"ElementImage": {
+				"properties": {
+					"attribution": {
+						"type": "string"
+					},
+					"url": {
+						"type": "string"
+					},
+					"title": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"attribution",
+					"url",
+					"title"
+				],
+				"type": "object"
+			},
+			"GlobalResponse_ElementImage_": {
+				"properties": {
+					"result": {
+						"$ref": "#/components/schemas/ElementImage"
+					},
+					"error": {
+						"type": "boolean",
+						"example": false
+					},
+					"message": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"result",
+					"error",
+					"message"
+				],
+				"type": "object"
+			}
+		},
+		"securitySchemes": {
+			"api_key": {
+				"type": "apiKey",
+				"name": "authorization",
+				"in": "header"
+			}
+		}
+	},
+	"info": {
+		"title": "element-table-server",
+		"version": "0.0.1",
+		"description": "an api to get info from element table",
+		"license": {
+			"name": "ISC"
+		},
+		"contact": {
+			"name": "a.tanoomandian"
+		}
+	},
+	"openapi": "3.0.0",
+	"paths": {
+		"/elements/{elementIndex}": {
+			"get": {
+				"operationId": "GetAnElementByIndex",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/GlobalResponse_Omit_TableElement.image__"
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "when requested element no found",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/GlobalResponse____"
+								},
+								"examples": {
+									"Example 1": {
+										"value": {
+											"message": "element not found",
+											"error": true,
+											"result": {}
+										}
+									}
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "when element index is not valid",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/GlobalResponse____"
+								},
+								"examples": {
+									"Example 1": {
+										"value": {
+											"message": "elementIndex is invalid",
+											"error": true,
+											"result": {}
+										}
+									}
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Chemistry"
+				],
+				"security": [],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "elementIndex",
+						"required": true,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					}
+				]
+			}
+		},
+		"/elements/{elementIndex}/image": {
+			"get": {
+				"operationId": "GetImageOfElementByIndex",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/GlobalResponse_ElementImage_"
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "when requested element no found",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/GlobalResponse____"
+								},
+								"examples": {
+									"Example 1": {
+										"value": {
+											"message": "element not found",
+											"error": true,
+											"result": {}
+										}
+									}
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "when element index is not valid",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/GlobalResponse____"
+								},
+								"examples": {
+									"Example 1": {
+										"value": {
+											"message": "elementIndex is invalid",
+											"error": true,
+											"result": {}
+										}
+									}
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Chemistry"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "elementIndex",
+						"required": true,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					}
+				]
+			}
+		}
+	},
+	"servers": [
+		{
+			"url": "/"
+		}
+	]
+}
