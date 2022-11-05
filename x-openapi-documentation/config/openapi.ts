@@ -11,18 +11,14 @@ export const openapiConfig = {
 	},
 	openapi_description: "This is school api for doing math and chemistry stuffs",
 	server: {
-		url: "{protocol}://{environment}.school.edu",
-		variables: {
-			protocol: {
-				enum: ["http", "https"],
-				default: "https",
-			},
-			environment: {
-				enum: ["api", "sandbox"],
-				default: "api",
-			},
-		},
+		url: "http://api.school.edu"
 	},
+    logo: {
+        url: '/docs-logo.jpeg',
+        backgroundColor: '#FFFFFF',
+        altText: 'School API',
+        href: 'https://www.google.com'
+    }
 };
 
 export const openapiSourceList: OpenApiSource[] = [

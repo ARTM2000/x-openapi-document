@@ -65,7 +65,6 @@ export class OpenAPIOrganizer {
 		if (isOpenAPIMergeError(mergedSchema)) {
 			throw new Error(`${mergedSchema.message} - ${mergedSchema.type}`);
 		}
-		console.log("original schema", mergedSchema.output);
 
 		return mergedSchema.output;
 	}
@@ -80,6 +79,7 @@ export class OpenAPIOrganizer {
 		openapiSchema.info.description = openapiConfig.openapi_description;
 		openapiSchema.info.contact = openapiConfig.openapi_contact;
 		openapiSchema.info.license = { name: "ISC" };
+		(openapiSchema.info as any)['x-logo'] = openapiConfig.logo;
 		/* update server */
 		openapiSchema.servers = [{ ...openapiConfig.server }];
 

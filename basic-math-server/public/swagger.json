@@ -13,7 +13,8 @@
 						"format": "double"
 					},
 					"error": {
-						"type": "boolean"
+						"type": "boolean",
+						"example": false
 					},
 					"message": {
 						"type": "string"

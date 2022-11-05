@@ -1,5 +1,8 @@
 export type GlobalResponse<T> = {
     message: string;
+    /**
+     * @example false
+     */
     error: boolean;
     result: T;
 }

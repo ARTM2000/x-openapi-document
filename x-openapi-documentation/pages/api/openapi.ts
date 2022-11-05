@@ -1,4 +1,3 @@
-import { Swagger } from "atlassian-openapi";
 import { NextApiRequest, NextApiResponse } from "next";
 import { OpenAPIOrganizer } from "../../server/openapi.service";
 
