@@ -1,23 +1,23 @@
 import { OpenApiSource } from "../types";
 
 export const openapiConfig = {
-	openapi_title: "School OpenAPI",
+	openapi_title: "{{openapi_top_title}}",
 	// Todo: should make it automated
 	openapi_api_version: "0.1.0",
 	openapi_contact: {
-		email: "school@example.com",
-		name: "Developers School",
-		url: "https://my.school.edu",
+		email: "{{openapi_email}}",
+		name: "{{openapi_name}}",
+		url: "{{openapi_url}}",
 	},
-	openapi_description: "This is school api for doing math and chemistry stuffs",
+	openapi_description: "{{openapi_top_description}}",
 	server: {
 		url: "http://api.school.edu"
 	},
     logo: {
         url: '/docs-logo.jpeg',
-        backgroundColor: '#FFFFFF',
         altText: 'School API',
-        href: 'https://www.google.com'
+        backgroundColor: '#FFFFFF',
+        href: '{{openapi_url}}'
     }
 };
 

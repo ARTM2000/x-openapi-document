@@ -3,22 +3,28 @@ import { ElementImage, GlobalResponse, TableElement } from "./types";
 import elements from "./elements";
 
 @Route("/elements")
-@Tags("Chemistry")
+@Tags("شیمی")
 export class ElementsController {
+	/**
+	 * {{description}}
+	 */
 	@Get("/{elementIndex}")
-	@Response<GlobalResponse<{}>>(404, "when requested element no found", {
+	@Response<GlobalResponse<{}>>(404, "{{description}}", {
 		message: "element not found",
 		error: true,
 		result: {},
 	})
-	@Response<GlobalResponse<{}>>(422, "when element index is not valid", {
+	@Response<GlobalResponse<{}>>(422, "{{description}}", {
 		message: "elementIndex is invalid",
 		error: true,
 		result: {},
 	})
 	getAnElementByIndex(
+		/**
+		 * {{description}}
+		 */
 		@Path("elementIndex") elementIndex: number
-	): GlobalResponse<Omit<TableElement, "image">> {
+	): GlobalResponse<TableElement> {
 		if (!elementIndex) {
 			throw { msg: "elementIndex is invalid", status: 422 };
 		}
@@ -34,19 +40,25 @@ export class ElementsController {
 		};
 	}
 
+	/**
+	 * {{description}}
+	 */
 	@Get("/{elementIndex}/image")
 	@Security("api_key")
-	@Response<GlobalResponse<{}>>(404, "when requested element no found", {
+	@Response<GlobalResponse<{}>>(404, "{{description}}", {
 		message: "element not found",
 		error: true,
 		result: {},
 	})
-	@Response<GlobalResponse<{}>>(422, "when element index is not valid", {
+	@Response<GlobalResponse<{}>>(422, "{{description}}", {
 		message: "elementIndex is invalid",
 		error: true,
 		result: {},
 	})
 	getImageOfElementByIndex(
+		/**
+		 * {{description}}
+		 */
 		@Path("elementIndex") elementIndex: number
 	): GlobalResponse<ElementImage> {
 		if (!elementIndex) {

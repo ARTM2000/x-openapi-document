@@ -83,6 +83,7 @@ export class OpenAPIOrganizer {
 		/* update server */
 		openapiSchema.servers = [{ ...openapiConfig.server }];
 
+		console.log("openapi >> ", openapiSchema);
 		return openapiSchema;
 	}
 

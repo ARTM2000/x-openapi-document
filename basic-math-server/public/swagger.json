@@ -10,14 +10,17 @@
 				"properties": {
 					"result": {
 						"type": "number",
-						"format": "double"
+						"format": "double",
+						"description": "{{description}}"
 					},
 					"error": {
 						"type": "boolean",
+						"description": "{{description}}",
 						"example": false
 					},
 					"message": {
-						"type": "string"
+						"type": "string",
+						"description": "{{description}}"
 					}
 				},
 				"required": [
@@ -34,7 +37,8 @@
 							"type": "number",
 							"format": "double"
 						},
-						"type": "array"
+						"type": "array",
+						"description": "{{description}}"
 					}
 				},
 				"required": [
@@ -46,11 +50,13 @@
 				"properties": {
 					"value": {
 						"type": "number",
-						"format": "double"
+						"format": "double",
+						"description": "{{description}}"
 					},
 					"from": {
 						"type": "number",
-						"format": "double"
+						"format": "double",
+						"description": "{{description}}"
 					}
 				},
 				"required": [
@@ -66,7 +72,8 @@
 							"type": "number",
 							"format": "double"
 						},
-						"type": "array"
+						"type": "array",
+						"description": "{{description}}"
 					}
 				},
 				"required": [
@@ -78,11 +85,13 @@
 				"properties": {
 					"by": {
 						"type": "number",
-						"format": "double"
+						"format": "double",
+						"description": "{{description}}"
 					},
 					"value": {
 						"type": "number",
-						"format": "double"
+						"format": "double",
+						"description": "{{description}}"
 					}
 				},
 				"required": [
@@ -122,17 +131,20 @@
 						}
 					}
 				},
+				"description": "{{description}}",
 				"tags": [
-					"Math"
+					"ریاضی"
 				],
 				"security": [],
 				"parameters": [],
 				"requestBody": {
+					"description": "{{description}}",
 					"required": true,
 					"content": {
 						"application/json": {
 							"schema": {
-								"$ref": "#/components/schemas/AddBody"
+								"$ref": "#/components/schemas/AddBody",
+								"description": "{{description}}"
 							}
 						}
 					}
@@ -154,17 +166,20 @@
 						}
 					}
 				},
+				"description": "{{description}}",
 				"tags": [
-					"Math"
+					"ریاضی"
 				],
 				"security": [],
 				"parameters": [],
 				"requestBody": {
+					"description": "{{description}}",
 					"required": true,
 					"content": {
 						"application/json": {
 							"schema": {
-								"$ref": "#/components/schemas/DecreaseBody"
+								"$ref": "#/components/schemas/DecreaseBody",
+								"description": "{{description}}"
 							}
 						}
 					}
@@ -186,17 +201,20 @@
 						}
 					}
 				},
+				"description": "{{description}}",
 				"tags": [
-					"Math"
+					"ریاضی"
 				],
 				"security": [],
 				"parameters": [],
 				"requestBody": {
+					"description": "{{description}}",
 					"required": true,
 					"content": {
 						"application/json": {
 							"schema": {
-								"$ref": "#/components/schemas/MultiplyBody"
+								"$ref": "#/components/schemas/MultiplyBody",
+								"description": "{{description}}"
 							}
 						}
 					}
@@ -218,17 +236,20 @@
 						}
 					}
 				},
+				"description": "{{description}}",
 				"tags": [
-					"Math"
+					"ریاضی"
 				],
 				"security": [],
 				"parameters": [],
 				"requestBody": {
+					"description": "{{description}}",
 					"required": true,
 					"content": {
 						"application/json": {
 							"schema": {
-								"$ref": "#/components/schemas/DivideBody"
+								"$ref": "#/components/schemas/DivideBody",
+								"description": "{{description}}"
 							}
 						}
 					}

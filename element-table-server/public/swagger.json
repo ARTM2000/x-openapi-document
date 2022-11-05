@@ -6,173 +6,225 @@
 		"requestBodies": {},
 		"responses": {},
 		"schemas": {
-			"Pick_TableElement.Exclude_keyofTableElement.image__": {
+			"ElementImage": {
 				"properties": {
-					"number": {
-						"type": "number",
-						"format": "double"
-					},
-					"symbol": {
-						"type": "string"
-					},
-					"name": {
-						"type": "string"
-					},
-					"appearance": {
+					"attribution": {
 						"type": "string",
-						"nullable": true
+						"description": "{{description}}"
 					},
-					"atomic_mass": {
-						"type": "number",
-						"format": "double"
-					},
-					"boil": {
-						"type": "number",
-						"format": "double",
-						"nullable": true
-					},
-					"category": {
-						"type": "string"
-					},
-					"density": {
-						"type": "number",
-						"format": "double",
-						"nullable": true
-					},
-					"discovered_by": {
+					"url": {
 						"type": "string",
-						"nullable": true
+						"description": "{{description}}"
 					},
-					"melt": {
-						"type": "number",
-						"format": "double",
-						"nullable": true
-					},
-					"molar_heat": {
-						"type": "number",
-						"format": "double",
-						"nullable": true
-					},
-					"named_by": {
+					"title": {
 						"type": "string",
-						"nullable": true
+						"description": "{{description}}"
+					}
+				},
+				"required": [
+					"attribution",
+					"url",
+					"title"
+				],
+				"type": "object"
+			},
+			"TableElement": {
+				"properties": {
+					"image": {
+						"$ref": "#/components/schemas/ElementImage",
+						"description": "{{description}}"
 					},
-					"period": {
-						"type": "number",
-						"format": "double"
-					},
-					"phase": {
-						"type": "string"
-					},
-					"source": {
-						"type": "string"
-					},
-					"bohr_model_image": {
+					"cpk-hex": {
 						"type": "string",
-						"nullable": true
-					},
-					"bohr_model_3d": {
-						"type": "string",
-						"nullable": true
-					},
-					"spectral_img": {
-						"type": "string",
-						"nullable": true
-					},
-					"summary": {
-						"type": "string"
-					},
-					"xpos": {
-						"type": "number",
-						"format": "double"
-					},
-					"ypos": {
-						"type": "number",
-						"format": "double"
-					},
-					"shells": {
-						"items": {
-							"type": "number",
-							"format": "double"
-						},
-						"type": "array"
-					},
-					"electron_configuration": {
-						"type": "string"
-					},
-					"electron_configuration_semantic": {
-						"type": "string"
-					},
-					"electron_affinity": {
-						"type": "number",
-						"format": "double",
-						"nullable": true
-					},
-					"electronegativity_pauling": {
-						"type": "number",
-						"format": "double",
-						"nullable": true
+						"nullable": true,
+						"description": "{{description}}"
 					},
 					"ionization_energies": {
 						"items": {
 							"type": "number",
 							"format": "double"
 						},
-						"type": "array"
+						"type": "array",
+						"description": "{{description}}"
 					},
-					"cpk-hex": {
+					"electronegativity_pauling": {
+						"type": "number",
+						"format": "double",
+						"nullable": true,
+						"description": "{{description}}"
+					},
+					"electron_affinity": {
+						"type": "number",
+						"format": "double",
+						"nullable": true,
+						"description": "{{description}}"
+					},
+					"electron_configuration_semantic": {
 						"type": "string",
-						"nullable": true
+						"description": "{{description}}"
+					},
+					"electron_configuration": {
+						"type": "string",
+						"description": "{{description}}"
+					},
+					"shells": {
+						"items": {
+							"type": "number",
+							"format": "double"
+						},
+						"type": "array",
+						"description": "{{description}}"
+					},
+					"ypos": {
+						"type": "number",
+						"format": "double",
+						"description": "{{description}}"
+					},
+					"xpos": {
+						"type": "number",
+						"format": "double",
+						"description": "{{description}}"
+					},
+					"symbol": {
+						"type": "string",
+						"description": "{{description}}"
+					},
+					"summary": {
+						"type": "string",
+						"description": "{{description}}"
+					},
+					"spectral_img": {
+						"type": "string",
+						"nullable": true,
+						"description": "{{description}}"
+					},
+					"bohr_model_3d": {
+						"type": "string",
+						"nullable": true,
+						"description": "{{description}}"
+					},
+					"bohr_model_image": {
+						"type": "string",
+						"nullable": true,
+						"description": "{{description}}"
+					},
+					"source": {
+						"type": "string",
+						"description": "{{description}}"
+					},
+					"phase": {
+						"type": "string",
+						"description": "{{description}}"
+					},
+					"period": {
+						"type": "number",
+						"format": "double",
+						"description": "{{description}}"
+					},
+					"number": {
+						"type": "number",
+						"format": "double",
+						"description": "{{description}}"
+					},
+					"named_by": {
+						"type": "string",
+						"nullable": true,
+						"description": "{{description}}"
+					},
+					"molar_heat": {
+						"type": "number",
+						"format": "double",
+						"nullable": true,
+						"description": "{{description}}"
+					},
+					"melt": {
+						"type": "number",
+						"format": "double",
+						"nullable": true,
+						"description": "{{description}}"
+					},
+					"discovered_by": {
+						"type": "string",
+						"nullable": true,
+						"description": "{{description}}"
+					},
+					"density": {
+						"type": "number",
+						"format": "double",
+						"nullable": true,
+						"description": "{{description}}"
+					},
+					"category": {
+						"type": "string",
+						"description": "{{description}}"
+					},
+					"boil": {
+						"type": "number",
+						"format": "double",
+						"nullable": true,
+						"description": "{{description}}"
+					},
+					"atomic_mass": {
+						"type": "number",
+						"format": "double",
+						"description": "{{description}}"
+					},
+					"appearance": {
+						"type": "string",
+						"nullable": true,
+						"description": "{{description}}"
+					},
+					"name": {
+						"type": "string",
+						"description": "{{description}}"
 					}
 				},
 				"required": [
-					"number",
-					"symbol",
-					"name",
-					"appearance",
-					"atomic_mass",
-					"boil",
-					"category",
-					"density",
-					"discovered_by",
-					"melt",
-					"molar_heat",
-					"named_by",
-					"period",
-					"phase",
-					"source",
-					"bohr_model_image",
-					"bohr_model_3d",
-					"spectral_img",
-					"summary",
-					"xpos",
-					"ypos",
-					"shells",
-					"electron_configuration",
-					"electron_configuration_semantic",
-					"electron_affinity",
-					"electronegativity_pauling",
+					"cpk-hex",
 					"ionization_energies",
-					"cpk-hex"
+					"electronegativity_pauling",
+					"electron_affinity",
+					"electron_configuration_semantic",
+					"electron_configuration",
+					"shells",
+					"ypos",
+					"xpos",
+					"symbol",
+					"summary",
+					"spectral_img",
+					"bohr_model_3d",
+					"bohr_model_image",
+					"source",
+					"phase",
+					"period",
+					"number",
+					"named_by",
+					"molar_heat",
+					"melt",
+					"discovered_by",
+					"density",
+					"category",
+					"boil",
+					"atomic_mass",
+					"appearance",
+					"name"
 				],
-				"type": "object",
-				"description": "From T, pick a set of properties whose keys are in the union K"
+				"type": "object"
 			},
-			"Omit_TableElement.image_": {
-				"$ref": "#/components/schemas/Pick_TableElement.Exclude_keyofTableElement.image__",
-				"description": "Construct a type with the properties of T except for those in type K."
-			},
-			"GlobalResponse_Omit_TableElement.image__": {
+			"GlobalResponse_TableElement_": {
 				"properties": {
 					"result": {
-						"$ref": "#/components/schemas/Omit_TableElement.image_"
+						"$ref": "#/components/schemas/TableElement",
+						"description": "{{description}}"
 					},
 					"error": {
 						"type": "boolean",
+						"description": "{{description}}",
 						"example": false
 					},
 					"message": {
-						"type": "string"
+						"type": "string",
+						"description": "{{description}}"
 					}
 				},
 				"required": [
@@ -186,14 +238,17 @@
 				"properties": {
 					"result": {
 						"properties": {},
-						"type": "object"
+						"type": "object",
+						"description": "{{description}}"
 					},
 					"error": {
 						"type": "boolean",
+						"description": "{{description}}",
 						"example": false
 					},
 					"message": {
-						"type": "string"
+						"type": "string",
+						"description": "{{description}}"
 					}
 				},
 				"required": [
@@ -203,36 +258,20 @@
 				],
 				"type": "object"
 			},
-			"ElementImage": {
-				"properties": {
-					"attribution": {
-						"type": "string"
-					},
-					"url": {
-						"type": "string"
-					},
-					"title": {
-						"type": "string"
-					}
-				},
-				"required": [
-					"attribution",
-					"url",
-					"title"
-				],
-				"type": "object"
-			},
 			"GlobalResponse_ElementImage_": {
 				"properties": {
 					"result": {
-						"$ref": "#/components/schemas/ElementImage"
+						"$ref": "#/components/schemas/ElementImage",
+						"description": "{{description}}"
 					},
 					"error": {
 						"type": "boolean",
+						"description": "{{description}}",
 						"example": false
 					},
 					"message": {
-						"type": "string"
+						"type": "string",
+						"description": "{{description}}"
 					}
 				},
 				"required": [
@@ -273,13 +312,13 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/GlobalResponse_Omit_TableElement.image__"
+									"$ref": "#/components/schemas/GlobalResponse_TableElement_"
 								}
 							}
 						}
 					},
 					"404": {
-						"description": "when requested element no found",
+						"description": "{{description}}",
 						"content": {
 							"application/json": {
 								"schema": {
@@ -298,7 +337,7 @@
 						}
 					},
 					"422": {
-						"description": "when element index is not valid",
+						"description": "{{description}}",
 						"content": {
 							"application/json": {
 								"schema": {
@@ -317,12 +356,14 @@
 						}
 					}
 				},
+				"description": "{{description}}",
 				"tags": [
-					"Chemistry"
+					"شیمی"
 				],
 				"security": [],
 				"parameters": [
 					{
+						"description": "{{description}}",
 						"in": "path",
 						"name": "elementIndex",
 						"required": true,
@@ -349,7 +390,7 @@
 						}
 					},
 					"404": {
-						"description": "when requested element no found",
+						"description": "{{description}}",
 						"content": {
 							"application/json": {
 								"schema": {
@@ -368,7 +409,7 @@
 						}
 					},
 					"422": {
-						"description": "when element index is not valid",
+						"description": "{{description}}",
 						"content": {
 							"application/json": {
 								"schema": {
@@ -387,8 +428,9 @@
 						}
 					}
 				},
+				"description": "{{description}}",
 				"tags": [
-					"Chemistry"
+					"شیمی"
 				],
 				"security": [
 					{
@@ -397,6 +439,7 @@
 				],
 				"parameters": [
 					{
+						"description": "{{description}}",
 						"in": "path",
 						"name": "elementIndex",
 						"required": true,

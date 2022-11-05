@@ -8,10 +8,18 @@ import {
 } from "./types";
 
 @Route("/basic")
-@Tags("Math")
+@Tags("ریاضی")
 export class MathController {
+	/**
+	 * {{description}}
+	 */
 	@Post("/plus")
-	add(@Body() body: AddBody): GlobalResponse<number> {
+	add(
+		/**
+		 * {{description}}
+		 */
+		@Body() body: AddBody
+	): GlobalResponse<number> {
 		let result = 0;
 		for (const n of body.numbers) {
 			result += n;
@@ -23,8 +31,16 @@ export class MathController {
 		};
 	}
 
+	/**
+	 * {{description}}
+	 */
 	@Post("/minus")
-	decrease(@Body() body: DecreaseBody): GlobalResponse<number> {
+	decrease(
+		/**
+		 * {{description}}
+		 */
+		@Body() body: DecreaseBody
+	): GlobalResponse<number> {
 		const result = body.from - body.value;
 		return {
 			message: "Done",
@@ -33,8 +49,16 @@ export class MathController {
 		};
 	}
 
-	@Post('/multiply')
-	multiply(@Body() body: MultiplyBody): GlobalResponse<number> {
+	/**
+	 * {{description}}
+	 */
+	@Post("/multiply")
+	multiply(
+		/**
+		 * {{description}}
+		 */
+		@Body() body: MultiplyBody
+	): GlobalResponse<number> {
 		let result = 1;
 		for (const n of body.numbers) {
 			result *= n;
@@ -46,8 +70,16 @@ export class MathController {
 		};
 	}
 
-	@Post('/divide')
-	divide(@Body() body: DivideBody): GlobalResponse<number> {
+	/**
+	 * {{description}}
+	 */
+	@Post("/divide")
+	divide(
+		/**
+		 * {{description}}
+		 */
+		@Body() body: DivideBody
+	): GlobalResponse<number> {
 		const result = body.value / body.by;
 		return {
 			message: "Done",
