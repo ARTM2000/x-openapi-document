@@ -20,9 +20,9 @@ app.use(
 app.use(
 	(
 		err: { msg: string; status: number },
-		req: Request,
+		_: Request,
 		res: Response,
-		next: NextFunction
+		__: NextFunction
 	) => {
 		return res
 			.status(err.status)
@@ -30,7 +30,7 @@ app.use(
 	}
 );
 
-const PORT: number = 1000;
+const PORT: number = +(process.env.PORT as string) || 1000;
 app.listen(PORT, () => {
 	console.log(`Server is running on port ${PORT} ...`);
 });

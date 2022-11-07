@@ -1,0 +1,31 @@
+version: "3.7"
+
+services:
+  basic-math-server:
+    container_name: openapi-basic-math
+    build: ./basic-math-server
+    restart: on-failure
+    volumes:
+      - ./basic-math-server/public:/opt/app/public
+    environment:
+      - PORT=1000
+    expose:
+      - 1000
+    networks:
+      - x-openapi-documentation
+
+  element-table-server:
+    container_name: openapi-element-table
+    build: ./basic-math-server
+    restart: on-failure
+    volumes:
+      - ./element-table-server/public:/opt/app/public
+    environment:
+      - PORT=1000
+    expose:
+      - 1000
+    networks:
+      - x-openapi-documentation
+
+networks:
+  x-openapi-documentation:
