@@ -23,11 +23,11 @@ export const openapiConfig = {
 
 export const openapiSourceList: OpenApiSource[] = [
 	{
-		url: "http://localhost:1000/assets/swagger.json",
+		url: "http://openapi-element-table:1000/assets/swagger.json",
 		prefix: "/chemistry",
 	},
 	{
-		url: "http://localhost:1001/assets/swagger.json",
+		url: "http://openapi-basic-math:1000/assets/swagger.json",
 		prefix: "/math",
 	},
 ];

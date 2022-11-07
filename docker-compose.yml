@@ -12,7 +12,7 @@ services:
     expose:
       - 1000
     networks:
-      - x-openapi-documentation
+      - x-openapi
 
   element-table-server:
     container_name: openapi-element-table
@@ -25,7 +25,18 @@ services:
     expose:
       - 1000
     networks:
-      - x-openapi-documentation
+      - x-openapi
+
+  x-openapi-documentation:
+    container_name: openapi-documentation
+    build: ./x-openapi-documentation
+    restart: on-failure
+    env_file:
+      - .env
+    ports:
+      - ${DOCUMENT_PORT}:3000
+    networks:
+      - x-openapi
 
 networks:
-  x-openapi-documentation:
+  x-openapi:
