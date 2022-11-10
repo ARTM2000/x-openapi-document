@@ -3,12 +3,15 @@ version: "3.7"
 services:
   basic-math-server:
     container_name: openapi-basic-math
-    build: ./basic-math-server
+    image: x-openapi-basic-math
+    build: 
+      context: ./basic-math-server
+      network: host
     restart: on-failure
     volumes:
       - ./basic-math-server/public:/opt/app/public
     environment:
-      - PORT=1000
+      PORT: 1000
     expose:
       - 1000
     networks:
@@ -16,12 +19,15 @@ services:
 
   element-table-server:
     container_name: openapi-element-table
-    build: ./basic-math-server
+    image: x-openapi-element-table
+    build: 
+      context: ./element-table-server
+      network: host
     restart: on-failure
     volumes:
       - ./element-table-server/public:/opt/app/public
     environment:
-      - PORT=1000
+      PORT: 1000
     expose:
       - 1000
     networks:
@@ -29,6 +35,11 @@ services:
 
   x-openapi-documentation:
     container_name: openapi-documentation
+    depends_on:
+      - element-table-server
+      - basic-math-server
+      # - x-openapi-cms
+    image: x-openapi-documentation
     build: ./x-openapi-documentation
     restart: on-failure
     env_file:
@@ -38,5 +49,58 @@ services:
     networks:
       - x-openapi
 
+  # x-openapi-cms:
+  #   container_name: openapi-cms
+  #   depends_on:
+  #     - x-openapi-database
+  #   platform: linux/arm64/v8
+  #   image: x-openapi-cms
+  #   build: 
+  #     context: ./document-cms
+  #     network: host
+  #   restart: unless-stopped
+  #   volumes:
+  #     - ./document-cms:/opt/app
+  #   env_file:
+  #     - .env
+  #   environment:
+  #     HOST: 0.0.0.0
+  #     PORT: 1337
+  #     DATABASE_CLIENT: ${DATABASE_CLIENT}
+  #     DATABASE_NAME: ${DATABASE_NAME}
+  #     DATABASE_HOST: ${DATABASE_HOST}
+  #     DATABASE_PORT: ${DATABASE_PORT}
+  #     DATABASE_USERNAME: ${DATABASE_USERNAME}
+  #     DATABASE_PASSWORD: ${DATABASE_PASSWORD}
+  #     JWT_SECRET: ${JWT_SECRET}
+  #     ADMIN_JWT_SECRET: ${ADMIN_JWT_SECRET}
+  #     APP_KEYS: ${APP_KEYS}
+  #     NODE_ENV: ${NODE_ENV}
+  #   ports:
+  #     - ${CMS_PORT}:1337
+  #   networks:
+  #     - x-openapi
+  x-openapi-database:
+    container_name: openapi-database
+    image: postgres:14
+    volumes:
+      - x-openapi-database:/var/lib/postgresql/data
+      - /etc/localtime:/etc/localtime
+    env_file: 
+      - .env
+    environment:
+      POSTGRES_DB: ${DATABASE_NAME}
+      POSTGRES_USER: ${DATABASE_USERNAME}
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
+    expose:
+      - 5432
+    ports:
+      - 2235:5432
+    networks:
+      - x-openapi
+
 networks:
   x-openapi:
+
+volumes:
+  x-openapi-database:

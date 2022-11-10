@@ -1,0 +1,38 @@
+{
+  "kind": "singleType",
+  "collectionName": "introductions",
+  "info": {
+    "singularName": "introduction",
+    "pluralName": "introductions",
+    "displayName": "Introduction",
+    "description": ""
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "company_name": {
+      "type": "string",
+      "required": true
+    },
+    "company_email": {
+      "type": "email",
+      "default": "services@example.com",
+      "required": true
+    },
+    "service_title": {
+      "type": "string",
+      "required": true
+    },
+    "company_site": {
+      "type": "string",
+      "default": "www.example.com",
+      "required": true
+    },
+    "description": {
+      "type": "richtext",
+      "required": true
+    }
+  }
+}

@@ -1,0 +1,28 @@
+{
+  "kind": "collectionType",
+  "collectionName": "error_status_codes",
+  "info": {
+    "singularName": "error-status-code",
+    "pluralName": "error-status-codes",
+    "displayName": "Error Status Code"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "status_code": {
+      "type": "string",
+      "required": true,
+      "unique": true,
+      "default": "200",
+      "maxLength": 3,
+      "minLength": 3
+    },
+    "description": {
+      "type": "text",
+      "required": true,
+      "unique": true
+    }
+  }
+}

@@ -22,7 +22,7 @@ export class MathController {
 	): GlobalResponse<number> {
 		let result = 0;
 		for (const n of body.numbers) {
-			result += n;
+			result += n.value;
 		}
 		return {
 			message: "Done",

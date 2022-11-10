@@ -2,8 +2,8 @@
 
 setup_actions() {
     ## create .env file
-    rm -f .env && cp .env.sample .env
-    
+    if [ -f ".env" ]; then mv .env .env.backup; fi;
+    cp .env.sample .env
 }
 
 setup_actions;

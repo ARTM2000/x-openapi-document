@@ -39,10 +39,14 @@ export class OpenAPIOrganizer {
 			source: OpenApiSource;
 		}[] = [];
 		for (const source of sources) {
-			const response = await axios.get<Swagger.SwaggerV3>(source.url, {
-				httpsAgent: new https.Agent({ rejectUnauthorized: false }),
-			});
-			openapiContents.push({ openapiContent: response.data, source });
+			try {
+				const response = await axios.get<Swagger.SwaggerV3>(source.url, {
+					httpsAgent: new https.Agent({ rejectUnauthorized: false }),
+				});
+				openapiContents.push({ openapiContent: response.data, source });
+			} catch (err) {	
+				console.error('fetching schema got error:', err);
+			}
 		}
 
 		return openapiContents;

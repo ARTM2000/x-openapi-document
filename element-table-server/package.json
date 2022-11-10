@@ -4,7 +4,7 @@
   "description": "an api to get info from element table",
   "main": "build/main.js",
   "scripts": {
-    "start": "node ./build/main.js",
+    "start": "npm run swagger && node ./build/main.js",
     "dev": "nodemon",
     "build": "tsc",
     "predev": "npm run swagger",

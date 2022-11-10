@@ -11,14 +11,14 @@ export const openapiConfig = {
 	},
 	openapi_description: "{{openapi_top_description}}",
 	server: {
-		url: "http://api.school.edu"
+		url: "http://api.school.edu",
 	},
-    logo: {
-        url: '/docs-logo.jpeg',
-        altText: 'School API',
-        backgroundColor: '#FFFFFF',
-        href: '{{openapi_url}}'
-    }
+	logo: {
+		url: "/docs-logo.jpeg",
+		altText: "School API",
+		backgroundColor: "#FFFFFF",
+		href: "{{openapi_url}}",
+	},
 };
 
 export const openapiSourceList: OpenApiSource[] = [

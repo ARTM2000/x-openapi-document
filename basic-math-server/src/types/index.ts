@@ -18,7 +18,12 @@ export type AddBody = {
     /**
      * {{description}}
      */
-    numbers: number[];
+    numbers: {
+        /**
+         * {{description}}
+         */
+        value: number
+    }[];
 }
 
 export type DecreaseBody = {
