@@ -18,7 +18,9 @@
       "unique": true
     },
     "title": {
-      "type": "string"
+      "type": "string",
+      "unique": true,
+      "required": true
     },
     "description": {
       "type": "richtext"
@@ -28,7 +30,12 @@
       "default": true
     },
     "service_input": {
-      "type": "json"
+      "type": "json",
+      "required": true
+    },
+    "service_output": {
+      "type": "json",
+      "required": true
     }
   }
 }

@@ -15,7 +15,7 @@ services:
     expose:
       - 1000
     networks:
-      - x-openapi
+      - xopenapi
 
   element-table-server:
     container_name: openapi-element-table
@@ -31,29 +31,42 @@ services:
     expose:
       - 1000
     networks:
-      - x-openapi
+      - xopenapi
 
-  x-openapi-documentation:
+  xopenapi-documentation:
     container_name: openapi-documentation
     depends_on:
       - element-table-server
       - basic-math-server
-      # - x-openapi-cms
+      # - xopenapi-cms
     image: x-openapi-documentation
-    build: ./x-openapi-documentation
+    build: 
+      context: ./x-openapi-documentation
+      target: development
     restart: on-failure
+    volumes:
+      - ./x-openapi-documentation/config:/app/dev/config
+      - ./x-openapi-documentation/server:/app/dev/server
+      - ./x-openapi-documentation/types:/app/dev/types
+      - ./x-openapi-documentation/pages:/app/dev/pages
+      - ./x-openapi-documentation/utils:/app/dev/utils
     env_file:
       - .env
+    environment:
+      ADMIN_PANEL_TOKEN: ${ADMIN_PANEL_TOKEN}
+      ADMIN_PANEL_URL: ${ADMIN_PANEL_URL}
     ports:
       - ${DOCUMENT_PORT}:3000
     networks:
-      - x-openapi
+      - xopenapi
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
 
-  # x-openapi-cms:
+  # xopenapi-cms:
   #   container_name: openapi-cms
   #   depends_on:
-  #     - x-openapi-database
-  #   platform: linux/arm64/v8
+  #     - xopenapi-database
+  #   # platform: linux/arm64/v8
   #   image: x-openapi-cms
   #   build: 
   #     context: ./document-cms
@@ -79,12 +92,13 @@ services:
   #   ports:
   #     - ${CMS_PORT}:1337
   #   networks:
-  #     - x-openapi
-  x-openapi-database:
+  #     - xopenapi
+
+  xopenapi-database:
     container_name: openapi-database
     image: postgres:14
     volumes:
-      - x-openapi-database:/var/lib/postgresql/data
+      - xopenapi-database:/var/lib/postgresql/data
       - /etc/localtime:/etc/localtime
     env_file: 
       - .env
@@ -97,10 +111,10 @@ services:
     ports:
       - 2235:5432
     networks:
-      - x-openapi
+      - xopenapi
 
 networks:
-  x-openapi:
+  xopenapi:
 
 volumes:
-  x-openapi-database:
+  xopenapi-database:

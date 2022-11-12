@@ -41,7 +41,7 @@ export class MathController {
 		 */
 		@Body() body: DecreaseBody
 	): GlobalResponse<number> {
-		const result = body.from - body.value;
+		const result = body.from.value - body.value.value;
 		return {
 			message: "Done",
 			error: false,

@@ -58,13 +58,88 @@
 			"DecreaseBody": {
 				"properties": {
 					"value": {
-						"type": "number",
-						"format": "double",
+						"properties": {
+							"value": {
+								"type": "number",
+								"format": "double",
+								"description": "{{description}}"
+							}
+						},
+						"required": [
+							"value"
+						],
+						"type": "object",
 						"description": "{{description}}"
 					},
 					"from": {
-						"type": "number",
-						"format": "double",
+						"properties": {
+							"test_data3": {
+								"properties": {
+									"data": {
+										"items": {
+											"properties": {
+												"name": {
+													"type": "string",
+													"description": "{{description}}"
+												}
+											},
+											"required": [
+												"name"
+											],
+											"type": "object"
+										},
+										"type": "array",
+										"description": "{{description}}"
+									}
+								},
+								"required": [
+									"data"
+								],
+								"type": "object",
+								"description": "{{description}}"
+							},
+							"test_data2": {
+								"properties": {
+									"data": {
+										"items": {
+											"type": "string"
+										},
+										"type": "array",
+										"description": "{{description}}"
+									}
+								},
+								"required": [
+									"data"
+								],
+								"type": "object",
+								"description": "{{description}}"
+							},
+							"test_data": {
+								"properties": {
+									"data": {
+										"type": "string",
+										"description": "{{description}}"
+									}
+								},
+								"required": [
+									"data"
+								],
+								"type": "object",
+								"description": "{{description}}"
+							},
+							"value": {
+								"type": "number",
+								"format": "double",
+								"description": "{{description}}"
+							}
+						},
+						"required": [
+							"test_data3",
+							"test_data2",
+							"test_data",
+							"value"
+						],
+						"type": "object",
 						"description": "{{description}}"
 					}
 				},

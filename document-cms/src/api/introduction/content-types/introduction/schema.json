@@ -33,6 +33,14 @@
     "description": {
       "type": "richtext",
       "required": true
+    },
+    "service_version": {
+      "type": "string",
+      "required": true
+    },
+    "service_baseurl": {
+      "type": "string",
+      "required": true
     }
   }
 }
