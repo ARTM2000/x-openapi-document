@@ -8,10 +8,11 @@ import {
 	MergeInput,
 } from "openapi-merge";
 import {
-	OpenAPIInputBodyItem,
+	OpenAPISchemaItem,
 	OpenAPIIntroduction,
 	OpenAPIServiceInput,
 	OpenApiSource,
+	OpenAPIServiceOutput,
 } from "../types";
 import { openapiSourceList, openapiConfig } from "../config/openapi";
 import { AdminPanelService } from "./admin-panel.service";
@@ -19,8 +20,19 @@ import { AdminPanelService } from "./admin-panel.service";
 export class OpenAPIOrganizer {
 	private readonly adminPanelService: AdminPanelService;
 	private readonly defaultDescription: string = "--";
+	// add this response status codes with "priority". They are check from beginning
+	private readonly successfulResponseStatusCodes: string[] = ["201", "200"];
 
 	constructor() {
+		// check if `successfulResponseStatusCodes` is defined and at least '200' was set
+		if (
+			this.successfulResponseStatusCodes.length === 0 ||
+			!this.successfulResponseStatusCodes.includes("200")
+		) {
+			throw new Error(
+				"[OpenAPIOrganizer] >> No 'successfulResponseStatusCode' is defined or '200' not exist in list"
+			);
+		}
 		this.adminPanelService = new AdminPanelService();
 	}
 
@@ -168,9 +180,27 @@ export class OpenAPIOrganizer {
 	): Promise<Swagger.SwaggerV3> {
 		for (let path of Object.keys(openapi.paths)) {
 			for (let method of Object.keys(openapi.paths[path])) {
-				// console.log("method path", method, path, (openapi.paths[path] as Swagger.PathItem)[method as Swagger.Method]);
+				console.log(
+					"method path",
+					method,
+					path,
+					(openapi.paths[path] as any)[method].operationId
+				);
+				//(openapi.paths[path] as Swagger.PathItem)[method as Swagger.Method]
 				const apiServiceValue =
 					await this.adminPanelService.getSingleAPIService(method, path);
+
+				// if ((openapi.paths[path] as any)[method].operationId === "Decrease") {
+				// 	const serviceOutput = this.exportOpenAPIServiceOutputFromOpenAPIPath(
+				// 		openapi,
+				// 		path,
+				// 		method
+				// 	);
+				// 	console.log(
+				// 		"service output >> ",
+				// 		serviceOutput["application/json"].__c as any
+				// 	);
+				// }
 
 				if (apiServiceValue.ok && apiServiceValue.result) {
 					(openapi.paths[path] as any)[method].description =
@@ -186,7 +216,12 @@ export class OpenAPIOrganizer {
 					continue;
 				}
 
-				const apiServiceInput = this.exportAPIServiceInputFromOpenAPIPath(
+				const apiServiceInput = this.exportOpenAPIServiceInputFromOpenAPIPath(
+					openapi,
+					path,
+					method
+				);
+				const apiServiceOutput = this.exportOpenAPIServiceOutputFromOpenAPIPath(
 					openapi,
 					path,
 					method
@@ -199,7 +234,7 @@ export class OpenAPIOrganizer {
 						description: this.defaultDescription,
 						public: true,
 						service_input: apiServiceInput,
-						service_output: {},
+						service_output: apiServiceOutput,
 					});
 				if (newAPIService.ok && newAPIService.result) {
 					(openapi.paths[path] as any)[method].description =
@@ -280,6 +315,7 @@ export class OpenAPIOrganizer {
 					.split("/")[2] as string;
 
 				if ((openapi.paths[path] as any)[method].requestBody) {
+					// !important: document content update trigger
 					(openapi.paths[path] as any)[method].requestBody.description =
 						body[contentType].description;
 				}
@@ -296,13 +332,13 @@ export class OpenAPIOrganizer {
 		return openapi;
 	}
 
-	private exportAPIServiceInputFromOpenAPIPath(
+	private exportOpenAPIServiceInputFromOpenAPIPath(
 		openapi: Swagger.SwaggerV3,
 		path: string,
 		method: string
 	): OpenAPIServiceInput {
 		//! should contain queries, body and paths information
-		const serviceInput = {
+		const serviceInput: OpenAPIServiceInput = {
 			paths: {},
 			queries: {},
 			body: {},
@@ -344,7 +380,8 @@ export class OpenAPIOrganizer {
 					schemaRef
 				];
 				serviceInput.body = {
-					[contentType]: this.schemaFieldsDetector(bodySchema),
+					...serviceInput.body,
+					[contentType]: this.schemaFieldsDetector(openapi, bodySchema).fields,
 				};
 			}
 		}
@@ -352,14 +389,79 @@ export class OpenAPIOrganizer {
 		return serviceInput;
 	}
 
+	private exportOpenAPIServiceOutputFromOpenAPIPath(
+		openapi: Swagger.SwaggerV3,
+		path: string,
+		method: string
+	): OpenAPIServiceOutput {
+		let serviceOutput: OpenAPIServiceOutput = {};
+		const serviceInfo: Swagger.Operation = (openapi.paths[path] as any)[method];
+		const responses = serviceInfo.responses;
+		const response: { successResponse?: Swagger.Response | Swagger.Reference } =
+			{};
+		for (const successStatusCode of this.successfulResponseStatusCodes) {
+			// get first preferred success response status code
+			if (!responses[successStatusCode]) {
+				continue;
+			}
+			response.successResponse = responses[successStatusCode];
+			break;
+		}
+
+		for (const contentType of Object.keys(
+			(response.successResponse as Swagger.Response | Swagger.Reference).content
+		)) {
+			const schemaRef = (
+				(response.successResponse as Swagger.Response | Swagger.Reference)
+					.content[contentType].schema.$ref as string
+			)
+				.replace("#/", "")
+				.split("/")[2] as string;
+			const responseSchema: Swagger.Schema = (
+				openapi.components?.schemas as any
+			)[schemaRef];
+			serviceOutput = {
+				...serviceOutput,
+				[contentType]: this.schemaFieldsDetector(openapi, responseSchema)
+					.fields,
+			};
+		}
+
+		return serviceOutput;
+	}
+
 	private schemaFieldsDetector = (
+		openapi: Swagger.SwaggerV3,
 		childSchema: Swagger.Schema | Swagger.Reference
-	): OpenAPIInputBodyItem => {
-		let b: {
-			description: string;
-			__children?: { [key: string]: OpenAPIInputBodyItem };
-		} = { description: this.defaultDescription };
-		let __children: { [key: string]: OpenAPIInputBodyItem } = {};
+	): { fields: OpenAPISchemaItem; openapi: Swagger.SwaggerV3 } => {
+		let b: OpenAPISchemaItem = {
+			description: this.defaultDescription,
+			__r: false,
+		};
+		let __c: { [key: string]: OpenAPISchemaItem } = {};
+
+		/**
+		 * if `childSchema` has a reference to other schema instead of
+		 * properties, get that ref use it as preferences
+		 */
+		if ((childSchema as any).$ref) {
+			const schemaRef = ((childSchema as any).$ref as string)
+				.replace("#/", "")
+				.split("/")[2];
+			const schema: Swagger.Schema = (openapi.components?.schemas as any)[
+				schemaRef
+			];
+			__c = {
+				[schemaRef]: this.schemaFieldsDetector(openapi, schema).fields,
+			};
+			b = {
+				...b,
+				__c,
+				__r: true,
+			};
+			return { fields: b, openapi };
+		}
+
 		/**
 		 * in case that no properties or items key exist, thats end of node.
 		 */
@@ -367,7 +469,7 @@ export class OpenAPIOrganizer {
 			(!childSchema.properties && !childSchema.items) ||
 			(childSchema.items && !childSchema.items.properties)
 		) {
-			return b;
+			return { fields: b, openapi };
 		}
 
 		/**
@@ -376,16 +478,19 @@ export class OpenAPIOrganizer {
 		 */
 		if (childSchema.properties) {
 			for (const field of Object.keys(childSchema.properties)) {
-				__children = {
-					...__children,
-					[field]: this.schemaFieldsDetector(childSchema.properties[field]),
+				__c = {
+					...__c,
+					[field]: this.schemaFieldsDetector(
+						openapi,
+						childSchema.properties[field]
+					).fields,
 				};
 			}
 			b = {
 				...b,
-				__children,
+				__c,
 			};
-			return b;
+			return { fields: b, openapi };
 		}
 
 		/**
@@ -393,21 +498,24 @@ export class OpenAPIOrganizer {
 		 * we should look into `items`.`properties` key instead of direct way
 		 */
 		for (const field of Object.keys(childSchema.items.properties)) {
-			__children = {
-				...__children,
-				[field]: this.schemaFieldsDetector(childSchema.items.properties[field]),
+			__c = {
+				...__c,
+				[field]: this.schemaFieldsDetector(
+					openapi,
+					childSchema.items.properties[field]
+				).fields,
 			};
 		}
 		b = {
 			...b,
-			__children,
+			__c,
 		};
-		return b;
+		return { fields: b, openapi };
 	};
 
 	private schemaFieldUpdater(
 		childSchema: Swagger.Schema | Swagger.Reference,
-		childContent: OpenAPIInputBodyItem
+		childContent: OpenAPISchemaItem
 	): Swagger.Schema | Swagger.Reference {
 		childSchema.description = childContent.description as string;
 
@@ -427,13 +535,13 @@ export class OpenAPIOrganizer {
 		 */
 		if (childSchema.properties) {
 			for (const property of Object.keys(childSchema.properties)) {
-				if (!childContent.__children || !childContent.__children[property]) {
+				if (!childContent.__c || !childContent.__c[property]) {
 					// !important: document content update trigger
 					continue;
 				}
 				childSchema.properties[property] = this.schemaFieldUpdater(
 					childSchema.properties[property],
-					childContent.__children[property]
+					childContent.__c[property]
 				);
 			}
 			return childSchema;
@@ -445,13 +553,13 @@ export class OpenAPIOrganizer {
 		 * In this case, `childContent` must have `__children` key; for its content
 		 */
 		for (const property of Object.keys(childSchema.items.properties)) {
-			if (!childContent.__children || !childContent.__children[property]) {
+			if (!childContent.__c || !childContent.__c[property]) {
 				// !important: document content update trigger
 				continue;
 			}
 			childSchema.items.properties[property] = this.schemaFieldUpdater(
 				childSchema.items.properties[property],
-				childContent.__children[property]
+				childContent.__c[property]
 			);
 		}
 		return childSchema;

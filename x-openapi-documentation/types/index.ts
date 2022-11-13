@@ -22,18 +22,29 @@ export type OpenAPIService = {
 	service_output: any; // json
 };
 
-export interface OpenAPIServiceInput {
-	paths: any;
-	queries: any;
-	body: {
-		// "application/json"?: OpenAPIInputBodyItem;
-		// "application/xml"?: OpenAPIInputBodyItem;
-		// "application/x-www-form-urlencoded"?: OpenAPIInputBodyItem;
-		[key: string]: OpenAPIInputBodyItem;
+export type OpenAPIServiceInput = {
+	paths: {
+		[key: string]: { description: string };
 	};
-}
+	queries: {
+		[key: string]: { description: string };
+	};
+	body: {
+		// "application/json"?: OpenAPISchemaItem;
+		// "application/xml"?: OpenAPISchemaItem;
+		// "application/x-www-form-urlencoded"?: OpenAPISchemaItem;
+		[key: string]: OpenAPISchemaItem;
+	};
+};
 
-export type OpenAPIInputBodyItem = {
+export type OpenAPIServiceOutput = {
+	// "application/json"?: OpenAPISchemaItem;
+	// "application/xml"?: OpenAPISchemaItem;
+	[key: string]: OpenAPISchemaItem;
+};
+
+export type OpenAPISchemaItem = {
 	description: string;
-	__children?: { [key: string]: OpenAPIInputBodyItem };
+	__c?: { [key: string]: OpenAPISchemaItem };
+	__r: boolean;
 };
