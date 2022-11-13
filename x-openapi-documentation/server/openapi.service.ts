@@ -8,6 +8,7 @@ import {
 	MergeInput,
 } from "openapi-merge";
 import {
+	OpenAPIInputBodyItem,
 	OpenAPIIntroduction,
 	OpenAPIServiceInput,
 	OpenApiSource,
@@ -17,6 +18,7 @@ import { AdminPanelService } from "./admin-panel.service";
 
 export class OpenAPIOrganizer {
 	private readonly adminPanelService: AdminPanelService;
+	private readonly defaultDescription: string = "--";
 
 	constructor() {
 		this.adminPanelService = new AdminPanelService();
@@ -148,14 +150,14 @@ export class OpenAPIOrganizer {
 				error
 			);
 			return {
-				openapi_title: "",
-				openapi_version: "",
-				openapi_description: "",
-				openapi_service_baseurl: "",
+				openapi_title: "unset",
+				openapi_version: "unset",
+				openapi_description: "unset",
+				openapi_service_baseurl: "unset",
 				openapi_contact: {
-					name: "",
-					email: "",
-					url: "",
+					name: "unset",
+					email: "unset",
+					url: "unset",
 				},
 			};
 		}
@@ -194,7 +196,7 @@ export class OpenAPIOrganizer {
 					await this.adminPanelService.createSingleAPIService({
 						title: (openapi.paths[path] as any)[method].operationId,
 						identifier: `${method}:${path}`,
-						description: "--",
+						description: this.defaultDescription,
 						public: true,
 						service_input: apiServiceInput,
 						service_output: {},
@@ -232,9 +234,8 @@ export class OpenAPIOrganizer {
 				).parameters?.findIndex(
 					(path_params) => path_params.in === "path" && path_params.name === p
 				);
-				console.log(">>>>>",p,method, path,targetIndex);
-				
 				if (targetIndex === undefined || targetIndex < 0) {
+					// !important: document content update trigger
 					continue;
 				}
 				(
@@ -253,12 +254,95 @@ export class OpenAPIOrganizer {
 					(path_params) => path_params.in === "query" && path_params.name === q
 				);
 				if (!targetIndex || targetIndex < 0) {
+					// !important: document content update trigger
 					continue;
 				}
 				(
 					((openapi.paths[path] as any)[method] as Swagger.Operation)
 						.parameters as Swagger.ParameterOrRef[]
 				)[targetIndex].description = queries[q].description;
+			}
+		}
+
+		if (body) {
+			const serviceInfo: Swagger.Operation = (openapi.paths[path] as any)[
+				method
+			];
+			const bodyFieldUpdater = (
+				childBody: Swagger.Schema | Swagger.Reference,
+				childContent: OpenAPIInputBodyItem
+			): Swagger.Schema | Swagger.Reference => {
+				childBody.description = childContent.description as string;
+
+				/**
+				 * in case that no properties or items key exist, thats end of node.
+				 */
+				if (
+					(!childBody.properties && !childBody.items) ||
+					(childBody.items && !childBody.items.properties)
+				) {
+					return childBody;
+				}
+
+				/**
+				 * When `childBody` has `properties` key, we should loop into fields.
+				 * In this case, `childContent` must have `__children` key; for its content
+				 */
+				if (childBody.properties) {
+					for (const property of Object.keys(childBody.properties)) {
+						if (
+							!childContent.__children ||
+							!childContent.__children[property]
+						) {
+							// !important: document content update trigger
+							continue;
+						}
+						childBody.properties[property] = bodyFieldUpdater(
+							childBody.properties[property],
+							childContent.__children[property]
+						);
+					}
+					return childBody;
+				}
+
+				/**
+				 * Otherwise, when `childBody` has `items` property, we should look into
+				 * `items`.`properties` instead of direct way.
+				 * In this case, `childContent` must have `__children` key; for its content
+				 */
+				for (const property of Object.keys(childBody.items.properties)) {
+					if (
+						!childContent.__children ||
+						!childContent.__children[property]
+					) {
+						// !important: document content update trigger
+						continue;
+					}
+					childBody.items.properties[property] = bodyFieldUpdater(
+						childBody.items.properties[property],
+						childContent.__children[property]
+					);
+				}
+				return childBody;
+			};
+			for (const contentType of Object.keys(body)) {
+				const schemaRef = (
+					(
+						(serviceInfo.requestBody as Swagger.RequestBody).content[
+							contentType
+						].schema as Swagger.Reference
+					).$ref as string
+				)
+					.replace("#/", "")
+					.split("/")[2] as string;
+				const bodySchema: Swagger.Schema = (openapi.components?.schemas as any)[
+					schemaRef
+				];
+
+				(openapi.components?.schemas as any)[schemaRef] = bodyFieldUpdater(
+					bodySchema,
+					body[contentType]
+				);
 			}
 		}
 
@@ -285,7 +369,7 @@ export class OpenAPIOrganizer {
 					serviceInput.paths = {
 						...serviceInput.paths,
 						[parameter.name]: {
-							description: "",
+							description: this.defaultDescription,
 						},
 					};
 					continue;
@@ -294,7 +378,7 @@ export class OpenAPIOrganizer {
 					serviceInput.queries = {
 						...serviceInput.queries,
 						[parameter.name]: {
-							description: "",
+							description: this.defaultDescription,
 						},
 					};
 					continue;
@@ -306,19 +390,19 @@ export class OpenAPIOrganizer {
 			// Todo: if it's possible, make this function's performance better (Big O notation)
 			const bodyFieldsDetector = (
 				bodyPart: Swagger.Schema | Swagger.Reference
-			) => {
-				let b: { description: string; __is_array: boolean; __children?: any } =
-					{ description: "--", __is_array: true };
-				let __children = {};
+			): OpenAPIInputBodyItem => {
+				let b: {
+					description: string;
+					__children?: { [key: string]: OpenAPIInputBodyItem };
+				} = { description: this.defaultDescription };
+				let __children: { [key: string]: OpenAPIInputBodyItem } = {};
 				/**
 				 * in case that no properties or items key exist, thats end of node.
 				 */
-				if (!bodyPart.properties && !bodyPart.items) {
-					b.__is_array = false;
-					return b;
-				}
-
-				if (bodyPart.items && !bodyPart.items.properties) {
+				if (
+					(!bodyPart.properties && !bodyPart.items) ||
+					(bodyPart.items && !bodyPart.items.properties)
+				) {
 					return b;
 				}
 

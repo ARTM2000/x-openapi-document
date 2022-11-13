@@ -22,8 +22,18 @@ export type OpenAPIService = {
 	service_output: any; // json
 };
 
-export type OpenAPIServiceInput = {
+export interface OpenAPIServiceInput {
 	paths: any;
 	queries: any;
-	body: any;
+	body: {
+		// "application/json"?: OpenAPIInputBodyItem;
+		// "application/xml"?: OpenAPIInputBodyItem;
+		// "application/x-www-form-urlencoded"?: OpenAPIInputBodyItem;
+		[key: string]: OpenAPIInputBodyItem;
+	};
+}
+
+export type OpenAPIInputBodyItem = {
+	description: string;
+	__children?: { [key: string]: OpenAPIInputBodyItem };
 };
