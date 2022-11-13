@@ -268,63 +268,6 @@ export class OpenAPIOrganizer {
 			const serviceInfo: Swagger.Operation = (openapi.paths[path] as any)[
 				method
 			];
-			const bodyFieldUpdater = (
-				childBody: Swagger.Schema | Swagger.Reference,
-				childContent: OpenAPIInputBodyItem
-			): Swagger.Schema | Swagger.Reference => {
-				childBody.description = childContent.description as string;
-
-				/**
-				 * in case that no properties or items key exist, thats end of node.
-				 */
-				if (
-					(!childBody.properties && !childBody.items) ||
-					(childBody.items && !childBody.items.properties)
-				) {
-					return childBody;
-				}
-
-				/**
-				 * When `childBody` has `properties` key, we should loop into fields.
-				 * In this case, `childContent` must have `__children` key; for its content
-				 */
-				if (childBody.properties) {
-					for (const property of Object.keys(childBody.properties)) {
-						if (
-							!childContent.__children ||
-							!childContent.__children[property]
-						) {
-							// !important: document content update trigger
-							continue;
-						}
-						childBody.properties[property] = bodyFieldUpdater(
-							childBody.properties[property],
-							childContent.__children[property]
-						);
-					}
-					return childBody;
-				}
-
-				/**
-				 * Otherwise, when `childBody` has `items` property, we should look into
-				 * `items`.`properties` instead of direct way.
-				 * In this case, `childContent` must have `__children` key; for its content
-				 */
-				for (const property of Object.keys(childBody.items.properties)) {
-					if (
-						!childContent.__children ||
-						!childContent.__children[property]
-					) {
-						// !important: document content update trigger
-						continue;
-					}
-					childBody.items.properties[property] = bodyFieldUpdater(
-						childBody.items.properties[property],
-						childContent.__children[property]
-					);
-				}
-				return childBody;
-			};
 			for (const contentType of Object.keys(body)) {
 				const schemaRef = (
 					(
@@ -335,14 +278,18 @@ export class OpenAPIOrganizer {
 				)
 					.replace("#/", "")
 					.split("/")[2] as string;
+
+				if ((openapi.paths[path] as any)[method].requestBody) {
+					(openapi.paths[path] as any)[method].requestBody.description =
+						body[contentType].description;
+				}
+
 				const bodySchema: Swagger.Schema = (openapi.components?.schemas as any)[
 					schemaRef
 				];
 
-				(openapi.components?.schemas as any)[schemaRef] = bodyFieldUpdater(
-					bodySchema,
-					body[contentType]
-				);
+				(openapi.components?.schemas as any)[schemaRef] =
+					this.schemaFieldUpdater(bodySchema, body[contentType]);
 			}
 		}
 
@@ -387,60 +334,6 @@ export class OpenAPIOrganizer {
 		}
 
 		if (serviceInfo.requestBody) {
-			// Todo: if it's possible, make this function's performance better (Big O notation)
-			const bodyFieldsDetector = (
-				bodyPart: Swagger.Schema | Swagger.Reference
-			): OpenAPIInputBodyItem => {
-				let b: {
-					description: string;
-					__children?: { [key: string]: OpenAPIInputBodyItem };
-				} = { description: this.defaultDescription };
-				let __children: { [key: string]: OpenAPIInputBodyItem } = {};
-				/**
-				 * in case that no properties or items key exist, thats end of node.
-				 */
-				if (
-					(!bodyPart.properties && !bodyPart.items) ||
-					(bodyPart.items && !bodyPart.items.properties)
-				) {
-					return b;
-				}
-
-				/**
-				 *  if `properties` key exist, we should loop go through every
-				 *  properties key and detect fields
-				 */
-				if (bodyPart.properties) {
-					for (const field of Object.keys(bodyPart.properties)) {
-						__children = {
-							...__children,
-							[field]: bodyFieldsDetector(bodyPart.properties[field]),
-						};
-					}
-					b = {
-						...b,
-						__children,
-					};
-					return b;
-				}
-
-				/**
-				 * in case that body part has `items` key and properties key found in it,
-				 * we should look into `items`.`properties` key instead of direct way
-				 */
-				for (const field of Object.keys(bodyPart.items.properties)) {
-					__children = {
-						...__children,
-						[field]: bodyFieldsDetector(bodyPart.items.properties[field]),
-					};
-				}
-				b = {
-					...b,
-					__children,
-				};
-				return b;
-			};
-
 			for (const contentType of Object.keys(serviceInfo.requestBody.content)) {
 				const schemaRef = (
 					serviceInfo.requestBody.content[contentType].schema.$ref as string
@@ -451,12 +344,117 @@ export class OpenAPIOrganizer {
 					schemaRef
 				];
 				serviceInput.body = {
-					[contentType]: bodyFieldsDetector(bodySchema),
+					[contentType]: this.schemaFieldsDetector(bodySchema),
 				};
 			}
 		}
 
 		return serviceInput;
+	}
+
+	private schemaFieldsDetector = (
+		childSchema: Swagger.Schema | Swagger.Reference
+	): OpenAPIInputBodyItem => {
+		let b: {
+			description: string;
+			__children?: { [key: string]: OpenAPIInputBodyItem };
+		} = { description: this.defaultDescription };
+		let __children: { [key: string]: OpenAPIInputBodyItem } = {};
+		/**
+		 * in case that no properties or items key exist, thats end of node.
+		 */
+		if (
+			(!childSchema.properties && !childSchema.items) ||
+			(childSchema.items && !childSchema.items.properties)
+		) {
+			return b;
+		}
+
+		/**
+		 *  if `properties` key exist, we should loop go through every
+		 *  properties key and detect fields
+		 */
+		if (childSchema.properties) {
+			for (const field of Object.keys(childSchema.properties)) {
+				__children = {
+					...__children,
+					[field]: this.schemaFieldsDetector(childSchema.properties[field]),
+				};
+			}
+			b = {
+				...b,
+				__children,
+			};
+			return b;
+		}
+
+		/**
+		 * in case that body part has `items` key and properties key found in it,
+		 * we should look into `items`.`properties` key instead of direct way
+		 */
+		for (const field of Object.keys(childSchema.items.properties)) {
+			__children = {
+				...__children,
+				[field]: this.schemaFieldsDetector(childSchema.items.properties[field]),
+			};
+		}
+		b = {
+			...b,
+			__children,
+		};
+		return b;
+	};
+
+	private schemaFieldUpdater(
+		childSchema: Swagger.Schema | Swagger.Reference,
+		childContent: OpenAPIInputBodyItem
+	): Swagger.Schema | Swagger.Reference {
+		childSchema.description = childContent.description as string;
+
+		/**
+		 * in case that no properties or items key exist, thats end of node.
+		 */
+		if (
+			(!childSchema.properties && !childSchema.items) ||
+			(childSchema.items && !childSchema.items.properties)
+		) {
+			return childSchema;
+		}
+
+		/**
+		 * When `childSchema` has `properties` key, we should loop into fields.
+		 * In this case, `childContent` must have `__children` key; for its content
+		 */
+		if (childSchema.properties) {
+			for (const property of Object.keys(childSchema.properties)) {
+				if (!childContent.__children || !childContent.__children[property]) {
+					// !important: document content update trigger
+					continue;
+				}
+				childSchema.properties[property] = this.schemaFieldUpdater(
+					childSchema.properties[property],
+					childContent.__children[property]
+				);
+			}
+			return childSchema;
+		}
+
+		/**
+		 * Otherwise, when `childSchema` has `items` property, we should look into
+		 * `items`.`properties` instead of direct way.
+		 * In this case, `childContent` must have `__children` key; for its content
+		 */
+		for (const property of Object.keys(childSchema.items.properties)) {
+			if (!childContent.__children || !childContent.__children[property]) {
+				// !important: document content update trigger
+				continue;
+			}
+			childSchema.items.properties[property] = this.schemaFieldUpdater(
+				childSchema.items.properties[property],
+				childContent.__children[property]
+			);
+		}
+		return childSchema;
 	}
 
 	private async convertOpenapiJsonToYaml(
