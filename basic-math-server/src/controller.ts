@@ -10,14 +10,8 @@ import {
 @Route("/basic")
 @Tags("ریاضی")
 export class MathController {
-	/**
-	 * {{description}}
-	 */
 	@Post("/plus")
 	add(
-		/**
-		 * {{description}}
-		 */
 		@Body() body: AddBody
 	): GlobalResponse<number> {
 		let result = 0;
@@ -31,14 +25,8 @@ export class MathController {
 		};
 	}
 
-	/**
-	 * {{description}}
-	 */
 	@Post("/minus")
 	decrease(
-		/**
-		 * {{description}}
-		 */
 		@Body() body: DecreaseBody
 	): GlobalResponse<number> {
 		const result = body.from.value - body.value.value;
@@ -49,14 +37,8 @@ export class MathController {
 		};
 	}
 
-	/**
-	 * {{description}}
-	 */
 	@Post("/multiply")
 	multiply(
-		/**
-		 * {{description}}
-		 */
 		@Body() body: MultiplyBody
 	): GlobalResponse<number> {
 		let result = 1;
@@ -70,14 +52,8 @@ export class MathController {
 		};
 	}
 
-	/**
-	 * {{description}}
-	 */
 	@Post("/divide")
 	divide(
-		/**
-		 * {{description}}
-		 */
 		@Body() body: DivideBody
 	): GlobalResponse<number> {
 		const result = body.value / body.by;

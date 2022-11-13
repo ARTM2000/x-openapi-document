@@ -10,17 +10,14 @@
 				"properties": {
 					"result": {
 						"type": "number",
-						"format": "double",
-						"description": "{{description}}"
+						"format": "double"
 					},
 					"error": {
 						"type": "boolean",
-						"description": "{{description}}",
 						"example": false
 					},
 					"message": {
-						"type": "string",
-						"description": "{{description}}"
+						"type": "string"
 					}
 				},
 				"required": [
@@ -37,8 +34,7 @@
 							"properties": {
 								"value": {
 									"type": "number",
-									"format": "double",
-									"description": "{{description}}"
+									"format": "double"
 								}
 							},
 							"required": [
@@ -46,8 +42,7 @@
 							],
 							"type": "object"
 						},
-						"type": "array",
-						"description": "{{description}}"
+						"type": "array"
 					}
 				},
 				"required": [
@@ -61,15 +56,13 @@
 						"properties": {
 							"value": {
 								"type": "number",
-								"format": "double",
-								"description": "{{description}}"
+								"format": "double"
 							}
 						},
 						"required": [
 							"value"
 						],
-						"type": "object",
-						"description": "{{description}}"
+						"type": "object"
 					},
 					"from": {
 						"properties": {
@@ -79,8 +72,7 @@
 										"items": {
 											"properties": {
 												"name": {
-													"type": "string",
-													"description": "{{description}}"
+													"type": "string"
 												}
 											},
 											"required": [
@@ -88,15 +80,13 @@
 											],
 											"type": "object"
 										},
-										"type": "array",
-										"description": "{{description}}"
+										"type": "array"
 									}
 								},
 								"required": [
 									"data"
 								],
-								"type": "object",
-								"description": "{{description}}"
+								"type": "object"
 							},
 							"test_data2": {
 								"properties": {
@@ -104,33 +94,28 @@
 										"items": {
 											"type": "string"
 										},
-										"type": "array",
-										"description": "{{description}}"
+										"type": "array"
 									}
 								},
 								"required": [
 									"data"
 								],
-								"type": "object",
-								"description": "{{description}}"
+								"type": "object"
 							},
 							"test_data": {
 								"properties": {
 									"data": {
-										"type": "string",
-										"description": "{{description}}"
+										"type": "string"
 									}
 								},
 								"required": [
 									"data"
 								],
-								"type": "object",
-								"description": "{{description}}"
+								"type": "object"
 							},
 							"value": {
 								"type": "number",
-								"format": "double",
-								"description": "{{description}}"
+								"format": "double"
 							}
 						},
 						"required": [
@@ -139,8 +124,7 @@
 							"test_data",
 							"value"
 						],
-						"type": "object",
-						"description": "{{description}}"
+						"type": "object"
 					}
 				},
 				"required": [
@@ -156,8 +140,7 @@
 							"type": "number",
 							"format": "double"
 						},
-						"type": "array",
-						"description": "{{description}}"
+						"type": "array"
 					}
 				},
 				"required": [
@@ -169,13 +152,11 @@
 				"properties": {
 					"by": {
 						"type": "number",
-						"format": "double",
-						"description": "{{description}}"
+						"format": "double"
 					},
 					"value": {
 						"type": "number",
-						"format": "double",
-						"description": "{{description}}"
+						"format": "double"
 					}
 				},
 				"required": [
@@ -215,20 +196,17 @@
 						}
 					}
 				},
-				"description": "{{description}}",
 				"tags": [
 					"ریاضی"
 				],
 				"security": [],
 				"parameters": [],
 				"requestBody": {
-					"description": "{{description}}",
 					"required": true,
 					"content": {
 						"application/json": {
 							"schema": {
-								"$ref": "#/components/schemas/AddBody",
-								"description": "{{description}}"
+								"$ref": "#/components/schemas/AddBody"
 							}
 						}
 					}
@@ -250,20 +228,17 @@
 						}
 					}
 				},
-				"description": "{{description}}",
 				"tags": [
 					"ریاضی"
 				],
 				"security": [],
 				"parameters": [],
 				"requestBody": {
-					"description": "{{description}}",
 					"required": true,
 					"content": {
 						"application/json": {
 							"schema": {
-								"$ref": "#/components/schemas/DecreaseBody",
-								"description": "{{description}}"
+								"$ref": "#/components/schemas/DecreaseBody"
 							}
 						}
 					}
@@ -285,20 +260,17 @@
 						}
 					}
 				},
-				"description": "{{description}}",
 				"tags": [
 					"ریاضی"
 				],
 				"security": [],
 				"parameters": [],
 				"requestBody": {
-					"description": "{{description}}",
 					"required": true,
 					"content": {
 						"application/json": {
 							"schema": {
-								"$ref": "#/components/schemas/MultiplyBody",
-								"description": "{{description}}"
+								"$ref": "#/components/schemas/MultiplyBody"
 							}
 						}
 					}
@@ -320,20 +292,17 @@
 						}
 					}
 				},
-				"description": "{{description}}",
 				"tags": [
 					"ریاضی"
 				],
 				"security": [],
 				"parameters": [],
 				"requestBody": {
-					"description": "{{description}}",
 					"required": true,
 					"content": {
 						"application/json": {
 							"schema": {
-								"$ref": "#/components/schemas/DivideBody",
-								"description": "{{description}}"
+								"$ref": "#/components/schemas/DivideBody"
 							}
 						}
 					}
