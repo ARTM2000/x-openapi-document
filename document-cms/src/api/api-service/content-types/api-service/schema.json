@@ -27,7 +27,8 @@
     },
     "public": {
       "type": "boolean",
-      "default": true
+      "default": true,
+      "required": true
     },
     "service_input": {
       "type": "json",
@@ -35,6 +36,10 @@
     },
     "service_output": {
       "type": "json",
+      "required": true
+    },
+    "response_description": {
+      "type": "string",
       "required": true
     }
   }

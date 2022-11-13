@@ -190,28 +190,36 @@ export class OpenAPIOrganizer {
 				const apiServiceValue =
 					await this.adminPanelService.getSingleAPIService(method, path);
 
-				// if ((openapi.paths[path] as any)[method].operationId === "Decrease") {
-				// 	const serviceOutput = this.exportOpenAPIServiceOutputFromOpenAPIPath(
-				// 		openapi,
-				// 		path,
-				// 		method
-				// 	);
-				// 	console.log(
-				// 		"service output >> ",
-				// 		serviceOutput["application/json"].__c as any
-				// 	);
-				// }
-
 				if (apiServiceValue.ok && apiServiceValue.result) {
+					// set service description
 					(openapi.paths[path] as any)[method].description =
 						apiServiceValue.result.description;
+					// set service name
 					(openapi.paths[path] as any)[method].operationId =
 						apiServiceValue.result.title;
+					// set success response description
+					const successResponse =
+						this.findSuccessResponseOfOpenAPIService(
+							openapi,
+							path,
+							method
+						);
+					(openapi.paths[path] as any)[method].responses[
+						successResponse.statusCode
+					].description = apiServiceValue.result.response_description;
+					// set input descriptions
 					openapi = this.replaceOpenAPIInputDescription(
 						openapi,
 						method as Swagger.Method,
 						path,
 						apiServiceValue.result.service_input
+					);
+					// set output descriptions
+					openapi = this.replaceOpenAPIOutputDescription(
+						openapi,
+						method as Swagger.Method,
+						path,
+						apiServiceValue.result.service_output
 					);
 					continue;
 				}
@@ -233,19 +241,40 @@ export class OpenAPIOrganizer {
 						identifier: `${method}:${path}`,
 						description: this.defaultDescription,
 						public: true,
+						response_description: this.defaultDescription,
 						service_input: apiServiceInput,
 						service_output: apiServiceOutput,
 					});
 				if (newAPIService.ok && newAPIService.result) {
+					// set service description
 					(openapi.paths[path] as any)[method].description =
 						newAPIService.result.description;
+					// set service name
 					(openapi.paths[path] as any)[method].operationId =
 						newAPIService.result.title;
+					// set success response description
+					const successResponse =
+						this.findSuccessResponseOfOpenAPIService(
+							openapi,
+							path,
+							method
+						);
+					(openapi.paths[path] as any)[method].responses[
+						successResponse.statusCode
+					].description = newAPIService.result.response_description;
+					// set input descriptions
 					openapi = this.replaceOpenAPIInputDescription(
 						openapi,
 						method as Swagger.Method,
 						path,
 						newAPIService.result.service_input
+					);
+					// set output descriptions
+					openapi = this.replaceOpenAPIOutputDescription(
+						openapi,
+						method as Swagger.Method,
+						path,
+						newAPIService.result.service_output
 					);
 				}
 			}
@@ -325,7 +354,11 @@ export class OpenAPIOrganizer {
 				];
 
 				(openapi.components?.schemas as any)[schemaRef] =
-					this.schemaFieldUpdater(bodySchema, body[contentType]);
+					this.schemaFieldUpdater(
+						openapi,
+						bodySchema,
+						body[contentType]
+					).schema;
 			}
 		}
 
@@ -389,31 +422,50 @@ export class OpenAPIOrganizer {
 		return serviceInput;
 	}
 
-	private exportOpenAPIServiceOutputFromOpenAPIPath(
+	private findSuccessResponseOfOpenAPIService(
 		openapi: Swagger.SwaggerV3,
 		path: string,
 		method: string
-	): OpenAPIServiceOutput {
-		let serviceOutput: OpenAPIServiceOutput = {};
+	): {
+		res: Swagger.Response | Swagger.Reference | undefined;
+		statusCode: string;
+	} {
 		const serviceInfo: Swagger.Operation = (openapi.paths[path] as any)[method];
 		const responses = serviceInfo.responses;
 		const response: { successResponse?: Swagger.Response | Swagger.Reference } =
 			{};
+		let finalStatusCode: string = "";
 		for (const successStatusCode of this.successfulResponseStatusCodes) {
 			// get first preferred success response status code
 			if (!responses[successStatusCode]) {
 				continue;
 			}
 			response.successResponse = responses[successStatusCode];
+			finalStatusCode = successStatusCode;
 			break;
 		}
+		return { res: response.successResponse, statusCode: finalStatusCode };
+	}
+
+	private exportOpenAPIServiceOutputFromOpenAPIPath(
+		openapi: Swagger.SwaggerV3,
+		path: string,
+		method: string
+	): OpenAPIServiceOutput {
+		let serviceOutput: OpenAPIServiceOutput = {};
+		const finalResponse = this.findSuccessResponseOfOpenAPIService(
+			openapi,
+			path,
+			method
+		).res;
 
 		for (const contentType of Object.keys(
-			(response.successResponse as Swagger.Response | Swagger.Reference).content
+			(finalResponse as Swagger.Response | Swagger.Reference).content
 		)) {
 			const schemaRef = (
-				(response.successResponse as Swagger.Response | Swagger.Reference)
-					.content[contentType].schema.$ref as string
+				(finalResponse as Swagger.Response | Swagger.Reference).content[
+					contentType
+				].schema.$ref as string
 			)
 				.replace("#/", "")
 				.split("/")[2] as string;
@@ -430,6 +482,46 @@ export class OpenAPIOrganizer {
 		return serviceOutput;
 	}
 
+	private replaceOpenAPIOutputDescription(
+		openapi: Swagger.SwaggerV3,
+		method: Swagger.Method,
+		path: string,
+		serviceOutput: OpenAPIServiceOutput
+	): Swagger.SwaggerV3 {
+		const finalResponse = this.findSuccessResponseOfOpenAPIService(
+			openapi,
+			path,
+			method
+		).res;
+
+		for (const contentType of Object.keys(
+			(finalResponse as Swagger.Response | Swagger.Reference).content
+		)) {
+			const schemaRef = (
+				(finalResponse as Swagger.Response | Swagger.Reference).content[
+					contentType
+				].schema.$ref as string
+			)
+				.replace("#/", "")
+				.split("/")[2] as string;
+
+			const mainResponseSchema: Swagger.Schema = (
+				openapi.components?.schemas as any
+			)[schemaRef];
+
+			const replacementResult = this.schemaFieldUpdater(
+				openapi,
+				mainResponseSchema,
+				serviceOutput[contentType]
+			);
+			(openapi.components?.schemas as any)[schemaRef] =
+				replacementResult.schema;
+			openapi = replacementResult.openapi;
+		}
+
+		return openapi;
+	}
+
 	private schemaFieldsDetector = (
 		openapi: Swagger.SwaggerV3,
 		childSchema: Swagger.Schema | Swagger.Reference
@@ -442,7 +534,7 @@ export class OpenAPIOrganizer {
 
 		/**
 		 * if `childSchema` has a reference to other schema instead of
-		 * properties, get that ref use it as preferences
+		 * properties, get that ref and process it as below
 		 */
 		if ((childSchema as any).$ref) {
 			const schemaRef = ((childSchema as any).$ref as string)
@@ -514,10 +606,42 @@ export class OpenAPIOrganizer {
 	};
 
 	private schemaFieldUpdater(
+		openapi: Swagger.SwaggerV3,
 		childSchema: Swagger.Schema | Swagger.Reference,
 		childContent: OpenAPISchemaItem
-	): Swagger.Schema | Swagger.Reference {
-		childSchema.description = childContent.description as string;
+	): {
+		schema: Swagger.Schema | Swagger.Reference;
+		openapi: Swagger.SwaggerV3;
+	} {
+		if (
+			!childSchema.description ||
+			childSchema.description === this.defaultDescription
+		) {
+			childSchema.description = childContent.description as string;
+		}
+
+		/**
+		 * if `childSchema` has a reference to other schema instead of
+		 * properties, get that ref and process it as below
+		 */
+		if ((childSchema as any).$ref) {
+			const schemaRef = ((childSchema as any).$ref as string)
+				.replace("#/", "")
+				.split("/")[2];
+			const schema: Swagger.Schema = (openapi.components?.schemas as any)[
+				schemaRef
+			];
+
+			if (childContent.__c && childContent.__c[schemaRef]) {
+				openapi = this.schemaFieldUpdater(
+					openapi,
+					schema,
+					childContent.__c[schemaRef]
+				).openapi;
+			} else {
+				// !important: document content update trigger
+			}
+		}
 
 		/**
 		 * in case that no properties or items key exist, thats end of node.
@@ -526,7 +650,7 @@ export class OpenAPIOrganizer {
 			(!childSchema.properties && !childSchema.items) ||
 			(childSchema.items && !childSchema.items.properties)
 		) {
-			return childSchema;
+			return { schema: childSchema, openapi };
 		}
 
 		/**
@@ -540,11 +664,12 @@ export class OpenAPIOrganizer {
 					continue;
 				}
 				childSchema.properties[property] = this.schemaFieldUpdater(
+					openapi,
 					childSchema.properties[property],
 					childContent.__c[property]
-				);
+				).schema;
 			}
-			return childSchema;
+			return { schema: childSchema, openapi };
 		}
 
 		/**
@@ -558,11 +683,12 @@ export class OpenAPIOrganizer {
 				continue;
 			}
 			childSchema.items.properties[property] = this.schemaFieldUpdater(
+				openapi,
 				childSchema.items.properties[property],
 				childContent.__c[property]
-			);
+			).schema;
 		}
-		return childSchema;
+		return { schema: childSchema, openapi };
 	}
 
 	private async convertOpenapiJsonToYaml(

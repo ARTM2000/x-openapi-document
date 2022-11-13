@@ -5,9 +5,6 @@ import elements from "./elements";
 @Route("/elements")
 @Tags("شیمی")
 export class ElementsController {
-	/**
-	 * {{description}}
-	 */
 	@Get("/{elementIndex}")
 	@Response<GlobalResponse<{}>>(404, "{{description}}", {
 		message: "element not found",
@@ -20,9 +17,6 @@ export class ElementsController {
 		result: {},
 	})
 	getAnElementByIndex(
-		/**
-		 * {{description}}
-		 */
 		@Path("elementIndex") elementIndex: number
 	): GlobalResponse<TableElement> {
 		if (!elementIndex) {
@@ -40,9 +34,6 @@ export class ElementsController {
 		};
 	}
 
-	/**
-	 * {{description}}
-	 */
 	@Get("/{elementIndex}/image")
 	@Security("api_key")
 	@Response<GlobalResponse<{}>>(404, "{{description}}", {
@@ -56,9 +47,6 @@ export class ElementsController {
 		result: {},
 	})
 	getImageOfElementByIndex(
-		/**
-		 * {{description}}
-		 */
 		@Path("elementIndex") elementIndex: number
 	): GlobalResponse<ElementImage> {
 		if (!elementIndex) {

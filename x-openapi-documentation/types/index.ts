@@ -18,8 +18,9 @@ export type OpenAPIService = {
 	title: string;
 	description: string;
 	public: boolean;
+	response_description: string;
 	service_input: OpenAPIServiceInput; // json
-	service_output: any; // json
+	service_output: OpenAPIServiceOutput; // json
 };
 
 export type OpenAPIServiceInput = {

@@ -9,16 +9,13 @@
 			"ElementImage": {
 				"properties": {
 					"attribution": {
-						"type": "string",
-						"description": "{{description}}"
+						"type": "string"
 					},
 					"url": {
-						"type": "string",
-						"description": "{{description}}"
+						"type": "string"
 					},
 					"title": {
-						"type": "string",
-						"description": "{{description}}"
+						"type": "string"
 					}
 				},
 				"required": [
@@ -31,152 +28,123 @@
 			"TableElement": {
 				"properties": {
 					"image": {
-						"$ref": "#/components/schemas/ElementImage",
-						"description": "{{description}}"
+						"$ref": "#/components/schemas/ElementImage"
 					},
 					"cpk-hex": {
 						"type": "string",
-						"nullable": true,
-						"description": "{{description}}"
+						"nullable": true
 					},
 					"ionization_energies": {
 						"items": {
 							"type": "number",
 							"format": "double"
 						},
-						"type": "array",
-						"description": "{{description}}"
+						"type": "array"
 					},
 					"electronegativity_pauling": {
 						"type": "number",
 						"format": "double",
-						"nullable": true,
-						"description": "{{description}}"
+						"nullable": true
 					},
 					"electron_affinity": {
 						"type": "number",
 						"format": "double",
-						"nullable": true,
-						"description": "{{description}}"
+						"nullable": true
 					},
 					"electron_configuration_semantic": {
-						"type": "string",
-						"description": "{{description}}"
+						"type": "string"
 					},
 					"electron_configuration": {
-						"type": "string",
-						"description": "{{description}}"
+						"type": "string"
 					},
 					"shells": {
 						"items": {
 							"type": "number",
 							"format": "double"
 						},
-						"type": "array",
-						"description": "{{description}}"
+						"type": "array"
 					},
 					"ypos": {
 						"type": "number",
-						"format": "double",
-						"description": "{{description}}"
+						"format": "double"
 					},
 					"xpos": {
 						"type": "number",
-						"format": "double",
-						"description": "{{description}}"
+						"format": "double"
 					},
 					"symbol": {
-						"type": "string",
-						"description": "{{description}}"
+						"type": "string"
 					},
 					"summary": {
-						"type": "string",
-						"description": "{{description}}"
+						"type": "string"
 					},
 					"spectral_img": {
 						"type": "string",
-						"nullable": true,
-						"description": "{{description}}"
+						"nullable": true
 					},
 					"bohr_model_3d": {
 						"type": "string",
-						"nullable": true,
-						"description": "{{description}}"
+						"nullable": true
 					},
 					"bohr_model_image": {
 						"type": "string",
-						"nullable": true,
-						"description": "{{description}}"
+						"nullable": true
 					},
 					"source": {
-						"type": "string",
-						"description": "{{description}}"
+						"type": "string"
 					},
 					"phase": {
-						"type": "string",
-						"description": "{{description}}"
+						"type": "string"
 					},
 					"period": {
 						"type": "number",
-						"format": "double",
-						"description": "{{description}}"
+						"format": "double"
 					},
 					"number": {
 						"type": "number",
-						"format": "double",
-						"description": "{{description}}"
+						"format": "double"
 					},
 					"named_by": {
 						"type": "string",
-						"nullable": true,
-						"description": "{{description}}"
+						"nullable": true
 					},
 					"molar_heat": {
 						"type": "number",
 						"format": "double",
-						"nullable": true,
-						"description": "{{description}}"
+						"nullable": true
 					},
 					"melt": {
 						"type": "number",
 						"format": "double",
-						"nullable": true,
-						"description": "{{description}}"
+						"nullable": true
 					},
 					"discovered_by": {
 						"type": "string",
-						"nullable": true,
-						"description": "{{description}}"
+						"nullable": true
 					},
 					"density": {
 						"type": "number",
 						"format": "double",
-						"nullable": true,
-						"description": "{{description}}"
+						"nullable": true
 					},
 					"category": {
-						"type": "string",
-						"description": "{{description}}"
+						"type": "string"
 					},
 					"boil": {
 						"type": "number",
 						"format": "double",
-						"nullable": true,
-						"description": "{{description}}"
+						"nullable": true
 					},
 					"atomic_mass": {
 						"type": "number",
-						"format": "double",
-						"description": "{{description}}"
+						"format": "double"
 					},
 					"appearance": {
 						"type": "string",
-						"nullable": true,
-						"description": "{{description}}"
+						"nullable": true
 					},
 					"name": {
-						"type": "string",
-						"description": "{{description}}"
+						"type": "string"
 					}
 				},
 				"required": [
@@ -214,17 +182,14 @@
 			"GlobalResponse_TableElement_": {
 				"properties": {
 					"result": {
-						"$ref": "#/components/schemas/TableElement",
-						"description": "{{description}}"
+						"$ref": "#/components/schemas/TableElement"
 					},
 					"error": {
 						"type": "boolean",
-						"description": "{{description}}",
 						"example": false
 					},
 					"message": {
-						"type": "string",
-						"description": "{{description}}"
+						"type": "string"
 					}
 				},
 				"required": [
@@ -238,17 +203,14 @@
 				"properties": {
 					"result": {
 						"properties": {},
-						"type": "object",
-						"description": "{{description}}"
+						"type": "object"
 					},
 					"error": {
 						"type": "boolean",
-						"description": "{{description}}",
 						"example": false
 					},
 					"message": {
-						"type": "string",
-						"description": "{{description}}"
+						"type": "string"
 					}
 				},
 				"required": [
@@ -261,17 +223,14 @@
 			"GlobalResponse_ElementImage_": {
 				"properties": {
 					"result": {
-						"$ref": "#/components/schemas/ElementImage",
-						"description": "{{description}}"
+						"$ref": "#/components/schemas/ElementImage"
 					},
 					"error": {
 						"type": "boolean",
-						"description": "{{description}}",
 						"example": false
 					},
 					"message": {
-						"type": "string",
-						"description": "{{description}}"
+						"type": "string"
 					}
 				},
 				"required": [
@@ -356,14 +315,12 @@
 						}
 					}
 				},
-				"description": "{{description}}",
 				"tags": [
 					"شیمی"
 				],
 				"security": [],
 				"parameters": [
 					{
-						"description": "{{description}}",
 						"in": "path",
 						"name": "elementIndex",
 						"required": true,
@@ -428,7 +385,6 @@
 						}
 					}
 				},
-				"description": "{{description}}",
 				"tags": [
 					"شیمی"
 				],
@@ -439,7 +395,6 @@
 				],
 				"parameters": [
 					{
-						"description": "{{description}}",
 						"in": "path",
 						"name": "elementIndex",
 						"required": true,
