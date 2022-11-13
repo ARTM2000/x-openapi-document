@@ -25,6 +25,10 @@
     "description": {
       "type": "richtext"
     },
+    "response_description": {
+      "type": "string",
+      "required": true
+    },
     "public": {
       "type": "boolean",
       "default": true,
