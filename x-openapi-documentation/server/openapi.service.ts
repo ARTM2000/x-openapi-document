@@ -528,7 +528,6 @@ export class OpenAPIOrganizer {
 	): { fields: OpenAPISchemaItem; openapi: Swagger.SwaggerV3 } => {
 		let b: OpenAPISchemaItem = {
 			description: this.defaultDescription,
-			__r: false,
 		};
 		let __c: { [key: string]: OpenAPISchemaItem } = {};
 
@@ -549,7 +548,6 @@ export class OpenAPIOrganizer {
 			b = {
 				...b,
 				__c,
-				__r: true,
 			};
 			return { fields: b, openapi };
 		}
@@ -655,7 +653,7 @@ export class OpenAPIOrganizer {
 
 		/**
 		 * When `childSchema` has `properties` key, we should loop into fields.
-		 * In this case, `childContent` must have `__children` key; for its content
+		 * In this case, `childContent` must have `__c` key; for its content
 		 */
 		if (childSchema.properties) {
 			for (const property of Object.keys(childSchema.properties)) {
@@ -675,7 +673,7 @@ export class OpenAPIOrganizer {
 		/**
 		 * Otherwise, when `childSchema` has `items` property, we should look into
 		 * `items`.`properties` instead of direct way.
-		 * In this case, `childContent` must have `__children` key; for its content
+		 * In this case, `childContent` must have `__c` key; for its content
 		 */
 		for (const property of Object.keys(childSchema.items.properties)) {
 			if (!childContent.__c || !childContent.__c[property]) {

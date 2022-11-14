@@ -47,5 +47,4 @@ export type OpenAPIServiceOutput = {
 export type OpenAPISchemaItem = {
 	description: string;
 	__c?: { [key: string]: OpenAPISchemaItem };
-	__r: boolean;
 };
