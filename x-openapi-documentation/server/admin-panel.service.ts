@@ -59,10 +59,64 @@ export class AdminPanelService {
 		const url = "/api-services";
 		try {
 			console.log("create service >>", data);
-			
+
 			const response = await this.httpClient.post<{
 				data: { attributes: OpenAPIService };
 			}>(url, { data: data });
+
+			return {
+				ok: true,
+				result: response.data.data.attributes,
+			};
+		} catch (err) {
+			console.error(err);
+			return {
+				ok: false,
+			};
+		}
+	}
+
+	async getErrorStatusCodeDescription(
+		statusCode: string
+	): Promise<{ ok: boolean; result?: { description: string | null } }> {
+		const url = "/error-status-codes";
+		try {
+			const response = await this.httpClient.get<{
+				data: { attributes: { status_code: string; description: string } }[];
+			}>(url, {
+				params: {
+					"filters[status_code][$eq]": `${statusCode}`,
+				},
+			});
+
+			return {
+				ok: Boolean(response.data.data[0].attributes),
+				result: {
+					description: response.data.data[0] ? response.data.data[0].attributes.description : null,
+				},
+			};
+		} catch (err) {
+			console.error(err);
+			return {
+				ok: false,
+			};
+		}
+	}
+
+	async createSingleErrorStatusCode(
+		statusCode: string,
+		description: string
+	): Promise<{
+		ok: boolean;
+		result?: { status_code: string; description: string };
+	}> {
+		const url = "/error-status-codes";
+		try {
+			console.log("create ErrorStatusCode >>", statusCode, description);
+
+			const response = await this.httpClient.post<{
+				data: { attributes: { status_code: string; description: string } };
+			}>(url, { data: { status_code: statusCode, description } });
 
 			return {
 				ok: true,

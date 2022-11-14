@@ -4,7 +4,8 @@
   "info": {
     "singularName": "error-status-code",
     "pluralName": "error-status-codes",
-    "displayName": "Error Status Code"
+    "displayName": "Error Status Code",
+    "description": ""
   },
   "options": {
     "draftAndPublish": true
@@ -15,14 +16,14 @@
       "type": "string",
       "required": true,
       "unique": true,
-      "default": "200",
+      "default": "400",
       "maxLength": 3,
       "minLength": 3
     },
     "description": {
-      "type": "text",
+      "type": "string",
       "required": true,
-      "unique": true
+      "unique": false
     }
   }
 }

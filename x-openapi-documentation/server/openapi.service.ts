@@ -198,15 +198,20 @@ export class OpenAPIOrganizer {
 					(openapi.paths[path] as any)[method].operationId =
 						apiServiceValue.result.title;
 					// set success response description
-					const successResponse =
-						this.findSuccessResponseOfOpenAPIService(
-							openapi,
-							path,
-							method
-						);
+					const successResponse = this.findSuccessResponseOfOpenAPIService(
+						openapi,
+						path,
+						method
+					);
 					(openapi.paths[path] as any)[method].responses[
 						successResponse.statusCode
 					].description = apiServiceValue.result.response_description;
+					// set description for error responses
+					openapi = await this.exchangeErrorResponsesOfOpenAPIService(
+						openapi,
+						path,
+						method
+					);
 					// set input descriptions
 					openapi = this.replaceOpenAPIInputDescription(
 						openapi,
@@ -253,15 +258,20 @@ export class OpenAPIOrganizer {
 					(openapi.paths[path] as any)[method].operationId =
 						newAPIService.result.title;
 					// set success response description
-					const successResponse =
-						this.findSuccessResponseOfOpenAPIService(
-							openapi,
-							path,
-							method
-						);
+					const successResponse = this.findSuccessResponseOfOpenAPIService(
+						openapi,
+						path,
+						method
+					);
 					(openapi.paths[path] as any)[method].responses[
 						successResponse.statusCode
 					].description = newAPIService.result.response_description;
+					// set description for error responses
+					openapi = await this.exchangeErrorResponsesOfOpenAPIService(
+						openapi,
+						path,
+						method
+					);
 					// set input descriptions
 					openapi = this.replaceOpenAPIInputDescription(
 						openapi,
@@ -445,6 +455,46 @@ export class OpenAPIOrganizer {
 			break;
 		}
 		return { res: response.successResponse, statusCode: finalStatusCode };
+	}
+
+	private async exchangeErrorResponsesOfOpenAPIService(
+		openapi: Swagger.SwaggerV3,
+		path: string,
+		method: string
+	): Promise<Swagger.SwaggerV3> {
+		const serviceInfo: Swagger.Operation = (openapi.paths[path] as any)[method];
+		const responses = serviceInfo.responses;
+		const response: {
+			errorResponses?: Swagger.Response[] | Swagger.Reference[] | undefined[];
+		} = {};
+
+		for (const responseStatusCode of Object.keys(responses)) {
+			if (this.successfulResponseStatusCodes.includes(responseStatusCode)) {
+				continue;
+			}
+
+			const errorResponse =
+				await this.adminPanelService.getErrorStatusCodeDescription(
+					responseStatusCode
+				);
+			if (errorResponse.ok && errorResponse.result?.description) {
+				(openapi.paths[path] as any)[method].responses[
+					responseStatusCode
+				].description = errorResponse.result.description;
+				continue;
+			}
+
+			// in case that error response status code did not exist
+			await this.adminPanelService.createSingleErrorStatusCode(
+				responseStatusCode,
+				this.defaultDescription
+			);
+			(openapi.paths[path] as any)[method].responses[
+				responseStatusCode
+			].description = this.defaultDescription;
+		}
+
+		return openapi;
 	}
 
 	private exportOpenAPIServiceOutputFromOpenAPIPath(
