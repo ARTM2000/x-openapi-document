@@ -24,27 +24,34 @@ export type OpenAPIService = {
 };
 
 export type OpenAPIServiceInput = {
-	paths: {
-		[key: string]: { description: string };
-	};
-	queries: {
-		[key: string]: { description: string };
-	};
-	body: {
-		// "application/json"?: OpenAPISchemaItem;
-		// "application/xml"?: OpenAPISchemaItem;
-		// "application/x-www-form-urlencoded"?: OpenAPISchemaItem;
-		[key: string]: OpenAPISchemaItem;
-	};
+	/** for example
+	// paths: {
+	// 	[key: string]: { description: string };
+	// };
+	// queries: {
+	// 	[key: string]: { description: string };
+	// };
+	// body: {
+	// 	// "application/json"?: OpenAPISchemaItem;
+	// 	// "application/xml"?: OpenAPISchemaItem;
+	// 	// "application/x-www-form-urlencoded"?: OpenAPISchemaItem;
+	// 	[key: string]: OpenAPISchemaItem;
+	// };
+	*/
+	[key: string]: OpenAPIGeneralSchema;
 };
 
 export type OpenAPIServiceOutput = {
 	// "application/json"?: OpenAPISchemaItem;
-	// "application/xml"?: OpenAPISchemaItem;
+	// "application/xml"?: OpenAPISchemaItem
 	[key: string]: OpenAPISchemaItem;
 };
 
 export type OpenAPISchemaItem = {
 	description: string;
-	__c?: { [key: string]: OpenAPISchemaItem };
+	__c?: OpenAPIGeneralSchema;
 };
+
+export type OpenAPIGeneralSchema = {
+	[key: string]: OpenAPISchemaItem;
+}

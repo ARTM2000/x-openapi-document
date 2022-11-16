@@ -135,6 +135,9 @@
 			},
 			"MultiplyBody": {
 				"properties": {
+					"flag": {
+						"type": "string"
+					},
 					"numbers": {
 						"items": {
 							"type": "number",
@@ -144,6 +147,7 @@
 					}
 				},
 				"required": [
+					"flag",
 					"numbers"
 				],
 				"type": "object"

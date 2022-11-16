@@ -36,6 +36,7 @@ export type DecreaseBody = {
 
 export type MultiplyBody = {
 	numbers: number[];
+	flag: string;
 };
 
 export type DivideBody = {
