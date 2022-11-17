@@ -25,6 +25,9 @@ export type OpenAPIService = {
 
 export type OpenAPIServiceInput = {
 	/** for example
+	// headers: {
+	// 	[key: string]: { description: string };
+	// };
 	// paths: {
 	// 	[key: string]: { description: string };
 	// };

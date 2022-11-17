@@ -15,7 +15,11 @@ import {
   OpenAPIServiceOutput,
   OpenAPIGeneralSchema,
 } from '../types';
-import { openapiSourceList, openapiConfig } from '../config/openapi';
+import {
+  openapiSourceList,
+  openapiConfig,
+  openapiSecuritySchemes,
+} from '../config/openapi';
 import { AdminPanelService } from './admin-panel.service';
 
 export class OpenAPIOrganizer {
@@ -156,7 +160,6 @@ export class OpenAPIOrganizer {
   //               )[s].properties[ppt] as Swagger.Schema
   //             ).description = this.defaultDescription;
   //           }
-
   //         }
   //       }
   //     }
@@ -172,6 +175,7 @@ export class OpenAPIOrganizer {
     openapiSchema = await this.exchangeOpenAPIContentWithAdminPanel(
       openapiSchema
     );
+    openapiSchema = this.formatSecuritySchemes(openapiSchema);
 
     openapiSchema.openapi = '3.0.0';
     /* update info */
@@ -191,6 +195,11 @@ export class OpenAPIOrganizer {
     openapiSchema.servers = [{ url: infoData.openapi_service_baseurl }];
 
     return openapiSchema;
+  }
+
+  private formatSecuritySchemes(openapi: Swagger.SwaggerV3): Swagger.SwaggerV3 {
+    (openapi.components as any).securitySchemes = openapiSecuritySchemes;
+    return openapi;
   }
 
   private async getInfoDataFromAdminPanel(): Promise<{
@@ -359,7 +368,26 @@ export class OpenAPIOrganizer {
     path: string,
     serviceInput: OpenAPIServiceInput
   ): Promise<Swagger.SwaggerV3> {
-    const { paths, queries, body } = serviceInput;
+    const { headers, paths, queries, body } = serviceInput;
+    if (headers) {
+      for (const h of Object.keys(headers)) {
+        // as openapi parameters are array, we should find each field's index to replace value
+        const targetIndex = (
+          (openapi.paths[path] as any)[method] as Swagger.Operation
+        ).parameters?.findIndex(
+          (header_params) => header_params.in === 'header' && header_params.name === h
+        );
+        if (targetIndex === undefined || targetIndex < 0) {
+          // !important: document content update trigger
+          continue;
+        }
+        (
+          ((openapi.paths[path] as any)[method] as Swagger.Operation)
+            .parameters as Swagger.ParameterOrRef[]
+        )[targetIndex].description = headers[h].description;
+      }
+    }
+    
     if (paths) {
       for (const p of Object.keys(paths)) {
         // as openapi parameters are array, we should find each field's index to replace value
@@ -385,7 +413,7 @@ export class OpenAPIOrganizer {
         const targetIndex = (
           (openapi.paths[path] as any)[method] as Swagger.Operation
         ).parameters?.findIndex(
-          (path_params) => path_params.in === 'query' && path_params.name === q
+          (query_params) => query_params.in === 'query' && query_params.name === q
         );
         if (!targetIndex || targetIndex < 0) {
           // !important: document content update trigger
@@ -450,6 +478,7 @@ export class OpenAPIOrganizer {
   ): OpenAPIServiceInput {
     //! should contain queries, body and paths information
     const serviceInput: OpenAPIServiceInput = {
+      headers: {},
       paths: {},
       queries: {},
       body: {},
@@ -459,6 +488,15 @@ export class OpenAPIOrganizer {
 
     if (serviceInfo.parameters) {
       for (const parameter of serviceInfo.parameters) {
+        if(parameter.in === 'header') {
+          serviceInput.headers = {
+            ...serviceInput.headers,
+            [parameter.name]: {
+              description: this.defaultDescription,
+            },
+          };
+          continue;
+        }
         if (parameter.in === 'path') {
           serviceInput.paths = {
             ...serviceInput.paths,
@@ -981,7 +1019,7 @@ export class OpenAPIOrganizer {
     ): OpenAPISchemaItem => {
       let childContent = content;
       for (const key of keyChain) {
-        this.logger('110 >> ', childContent)
+        this.logger('110 >> ', childContent);
         if ((childContent[key] as OpenAPISchemaItem).__c) {
           // @ts-ignore
           childContent = childContent[key].__c;
@@ -1127,6 +1165,15 @@ export class OpenAPIOrganizer {
             ].__c = checkResult.content;
             if (checkResult.isDifferent) somethingsInInputChanged = true;
           }
+        }
+
+        if (newOpenAPIServiceInput.headers && previousInputContent.headers) {
+          const checkResult = checkOpenAPIService(
+            previousInputContent.headers as OpenAPIGeneralSchema,
+            newOpenAPIServiceInput.headers as OpenAPIGeneralSchema
+          );
+          newOpenAPIServiceInput.headers = checkResult.content;
+          if (checkResult.isDifferent) somethingsInInputChanged = true;
         }
 
         if (newOpenAPIServiceInput.paths && previousInputContent.paths) {
