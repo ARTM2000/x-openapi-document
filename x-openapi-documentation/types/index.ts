@@ -44,7 +44,7 @@ export type OpenAPIServiceInput = {
 export type OpenAPIServiceOutput = {
 	// "application/json"?: OpenAPISchemaItem;
 	// "application/xml"?: OpenAPISchemaItem
-	[key: string]: OpenAPISchemaItem;
+	[key: string]: OpenAPISchemaItem | OpenAPISchemaItem[];
 };
 
 export type OpenAPISchemaItem = {

@@ -101,16 +101,79 @@ export class OpenAPIOrganizer {
     return mergedSchema.output;
   }
 
+  // private clearAllOpenAPIDescription(
+  //   openapi: Swagger.SwaggerV3
+  // ): Swagger.SwaggerV3 {
+  //   openapi.info.description = this.defaultDescription;
+  //   for (const p of Object.keys(openapi.paths)) {
+  //     const path = openapi.paths[p];
+  //     for (const m of Object.keys(path)) {
+  //       const method = path[m as Swagger.Method] as Swagger.Operation;
+  //       if (method?.description) {
+  //         (
+  //           openapi.paths[p][m as Swagger.Method] as Swagger.Operation
+  //         ).description = this.defaultDescription;
+  //       }
+
+  //       if (method.responses) {
+  //         for (const r of Object.keys(method.responses)) {
+  //           const response = method.responses[r];
+  //           if (response.description) {
+  //             (
+  //               openapi.paths[p][m as Swagger.Method] as Swagger.Operation
+  //             ).responses[r].description = this.defaultDescription;
+  //           }
+  //         }
+  //       }
+
+  //       if (method.parameters) {
+  //         for (const parameterIndex in method.parameters) {
+  //           const parameter = method.parameters[parameterIndex];
+  //           if (parameter.description) {
+  //             (
+  //               (openapi.paths[p][m as Swagger.Method] as Swagger.Operation)
+  //                 .parameters as Swagger.ParameterOrRef[]
+  //             )[parameterIndex].description = this.defaultDescription;
+  //           }
+  //         }
+  //       }
+  //     }
+  //   }
+
+  //   const schemas = openapi.components?.schemas;
+  //   if (schemas) {
+  //     for (const s of Object.keys(schemas)) {
+  //       const schema = schemas[s];
+  //       if (schema.properties) {
+  //         for (const ppt of Object.keys(schema.properties)) {
+  //           const property = schema.properties[ppt] as Swagger.Schema;
+  //           if (property.description) {
+  //             (
+  //               (
+  //                 openapi.components?.schemas as {
+  //                   [key: string]: Swagger.Schema | Swagger.Reference;
+  //                 }
+  //               )[s].properties[ppt] as Swagger.Schema
+  //             ).description = this.defaultDescription;
+  //           }
+
+  //         }
+  //       }
+  //     }
+  //   }
+
+  //   return openapi;
+  // }
+
   private async formatOpenapiJSON(
     openapiSchema: Swagger.SwaggerV3
   ): Promise<Swagger.SwaggerV3> {
-    openapiSchema.openapi = '3.0.0';
-
     const infoData = await this.getInfoDataFromAdminPanel();
     openapiSchema = await this.exchangeOpenAPIContentWithAdminPanel(
       openapiSchema
     );
 
+    openapiSchema.openapi = '3.0.0';
     /* update info */
     openapiSchema.info.title = infoData.openapi_title;
     openapiSchema.info.version = infoData.openapi_version;
@@ -515,11 +578,43 @@ export class OpenAPIOrganizer {
     for (const contentType of Object.keys(
       (finalResponse as Swagger.Response | Swagger.Reference).content
     )) {
-      const schemaRef = (
+      this.logger(
+        'here >>',
         (finalResponse as Swagger.Response | Swagger.Reference).content[
           contentType
-        ].schema.$ref as string
-      )
+        ].schema
+      );
+
+      const schema = (finalResponse as Swagger.Response | Swagger.Reference)
+        .content[contentType].schema;
+      if (schema.oneOf) {
+        for (const refObj of schema.oneOf) {
+          this.logger(refObj);
+          const schemaRef = (refObj as Swagger.Reference).$ref
+            .replace('#/', '')
+            .split('/')[2] as string;
+
+          const responseSchema: Swagger.Schema = (
+            openapi.components?.schemas as any
+          )[schemaRef];
+
+          this.logger('serviceOutput >> ', serviceOutput);
+          const prevContentType = serviceOutput[contentType]
+            ? (serviceOutput[contentType] as OpenAPISchemaItem[])
+            : [];
+
+          serviceOutput = {
+            ...serviceOutput,
+            [contentType]: [
+              ...prevContentType,
+              this.schemaFieldsDetector(openapi, responseSchema).fields,
+            ],
+          };
+        }
+        continue;
+      }
+
+      const schemaRef = (schema.$ref as string)
         .replace('#/', '')
         .split('/')[2] as string;
       const responseSchema: Swagger.Schema = (
@@ -550,6 +645,41 @@ export class OpenAPIOrganizer {
     for (const contentType of Object.keys(
       (finalResponse as Swagger.Response | Swagger.Reference).content
     )) {
+      const schema = (finalResponse as Swagger.Response | Swagger.Reference)
+        .content[contentType].schema;
+      if (schema.oneOf && Array.isArray(serviceOutput[contentType])) {
+        for (const refIndex in schema.oneOf) {
+          const refObj = schema.oneOf[refIndex] as Swagger.Reference;
+          const schemaRef = refObj.$ref
+            .replace('#/', '')
+            .split('/')[2] as string;
+
+          const mainResponseSchema: Swagger.Schema = (
+            openapi.components?.schemas as any
+          )[schemaRef];
+
+          const replacementResult = await this.schemaFieldUpdater(
+            openapi,
+            mainResponseSchema,
+            (serviceOutput[contentType] as OpenAPISchemaItem[])[
+              +refIndex
+            ] as OpenAPISchemaItem,
+            {
+              path,
+              method,
+              type: 'output',
+              originalContent: serviceOutput,
+              keyChain: [contentType, refIndex],
+            }
+          );
+
+          (openapi.components?.schemas as any)[schemaRef] =
+            replacementResult.schema;
+          openapi = replacementResult.openapi;
+        }
+        continue;
+      }
+
       const schemaRef = (
         (finalResponse as Swagger.Response | Swagger.Reference).content[
           contentType
@@ -565,7 +695,7 @@ export class OpenAPIOrganizer {
       const replacementResult = await this.schemaFieldUpdater(
         openapi,
         mainResponseSchema,
-        serviceOutput[contentType],
+        serviceOutput[contentType] as OpenAPISchemaItem,
         {
           path,
           method,
@@ -680,16 +810,18 @@ export class OpenAPIOrganizer {
   }> {
     if (
       !childSchema.description ||
+      (childSchema.description as string).match(/[a-z]+/gi) ||
       childSchema.description === this.defaultDescription
     ) {
-      childSchema.description = childContent.description as string;
+      childSchema.description = childSchema.description =
+        childContent.description as string;
     }
 
-    /**
-     * if `childSchema` has a reference to other schema instead of
-     * properties, get that ref and process it as below
-     */
     if ((childSchema as any).$ref) {
+      /**
+       * if `childSchema` has a reference to other schema instead of
+       * properties, get that ref and process it as below
+       */
       const schemaRef = ((childSchema as any).$ref as string)
         .replace('#/', '')
         .split('/')[2];
@@ -849,7 +981,8 @@ export class OpenAPIOrganizer {
     ): OpenAPISchemaItem => {
       let childContent = content;
       for (const key of keyChain) {
-        if (childContent[key].__c) {
+        this.logger('110 >> ', childContent)
+        if ((childContent[key] as OpenAPISchemaItem).__c) {
           // @ts-ignore
           childContent = childContent[key].__c;
           continue;
@@ -1065,18 +1198,52 @@ export class OpenAPIOrganizer {
           previousContent['application/json']
         ) {
           this.logger('check json');
-          const checkResult = checkOpenAPIService(
-            previousContent['application/json'].__c as OpenAPIGeneralSchema,
-            newOpenAPIServiceOutput['application/json']
-              .__c as OpenAPIGeneralSchema
-          );
-          newOpenAPIServiceOutput['application/json'].__c = checkResult.content;
-          this.logger(
-            ' -----------------> ',
-            JSON.stringify(newOpenAPIServiceOutput['application/json'].__c)
-          );
 
-          if (checkResult.isDifferent) somethingsInOutputChanged = true;
+          if (
+            Array.isArray(newOpenAPIServiceOutput['application/json']) &&
+            Array.isArray(previousContent['application/json'])
+          ) {
+            for (const index in newOpenAPIServiceOutput['application/json']) {
+              const checkResult = checkOpenAPIService(
+                previousContent['application/json'][index]
+                  .__c as OpenAPIGeneralSchema,
+                newOpenAPIServiceOutput['application/json'][index]
+                  .__c as OpenAPIGeneralSchema
+              );
+              newOpenAPIServiceOutput['application/json'][index].__c =
+                checkResult.content;
+              this.logger(
+                ' -----------------> ',
+                JSON.stringify(
+                  newOpenAPIServiceOutput['application/json'][index].__c
+                )
+              );
+
+              if (checkResult.isDifferent) somethingsInOutputChanged = true;
+            }
+          } else {
+            const checkResult = checkOpenAPIService(
+              (previousContent['application/json'] as OpenAPISchemaItem)
+                .__c as OpenAPIGeneralSchema,
+              (newOpenAPIServiceOutput['application/json'] as OpenAPISchemaItem)
+                .__c as OpenAPIGeneralSchema
+            );
+            (
+              newOpenAPIServiceOutput['application/json'] as OpenAPISchemaItem
+            ).__c = checkResult.content;
+            this.logger(
+              ' -----------------> ',
+              JSON.stringify(
+                (
+                  newOpenAPIServiceOutput[
+                    'application/json'
+                  ] as OpenAPISchemaItem
+                ).__c
+              )
+            );
+
+            if (checkResult.isDifferent) somethingsInOutputChanged = true;
+          }
         }
         if (
           newOpenAPIServiceOutput['application/xml'] &&
@@ -1084,13 +1251,51 @@ export class OpenAPIOrganizer {
         ) {
           this.logger('check xml');
 
-          const checkResult = checkOpenAPIService(
-            previousContent['application/xml'].__c as OpenAPIGeneralSchema,
-            newOpenAPIServiceOutput['application/xml']
-              .__c as OpenAPIGeneralSchema
-          );
-          newOpenAPIServiceOutput['application/xml'].__c = checkResult.content;
-          if (checkResult.isDifferent) somethingsInOutputChanged = true;
+          if (
+            Array.isArray(newOpenAPIServiceOutput['application/xml']) &&
+            Array.isArray(previousContent['application/xml'])
+          ) {
+            for (const index in newOpenAPIServiceOutput['application/xml']) {
+              const checkResult = checkOpenAPIService(
+                previousContent['application/xml'][index]
+                  .__c as OpenAPIGeneralSchema,
+                newOpenAPIServiceOutput['application/xml'][index]
+                  .__c as OpenAPIGeneralSchema
+              );
+              newOpenAPIServiceOutput['application/xml'][index].__c =
+                checkResult.content;
+              this.logger(
+                ' -----------------> ',
+                JSON.stringify(
+                  newOpenAPIServiceOutput['application/xml'][index].__c
+                )
+              );
+
+              if (checkResult.isDifferent) somethingsInOutputChanged = true;
+            }
+          } else {
+            const checkResult = checkOpenAPIService(
+              (previousContent['application/xml'] as OpenAPISchemaItem)
+                .__c as OpenAPIGeneralSchema,
+              (newOpenAPIServiceOutput['application/xml'] as OpenAPISchemaItem)
+                .__c as OpenAPIGeneralSchema
+            );
+            (
+              newOpenAPIServiceOutput['application/xml'] as OpenAPISchemaItem
+            ).__c = checkResult.content;
+            this.logger(
+              ' -----------------> ',
+              JSON.stringify(
+                (
+                  newOpenAPIServiceOutput[
+                    'application/xml'
+                  ] as OpenAPISchemaItem
+                ).__c
+              )
+            );
+
+            if (checkResult.isDifferent) somethingsInOutputChanged = true;
+          }
         }
         if (
           newOpenAPIServiceOutput['application/x-www-form-urlencoded'] &&
@@ -1098,15 +1303,67 @@ export class OpenAPIOrganizer {
         ) {
           this.logger('check form-data');
 
-          const checkResult = checkOpenAPIService(
-            previousContent['application/x-www-form-urlencoded']
-              .__c as OpenAPIGeneralSchema,
-            newOpenAPIServiceOutput['application/x-www-form-urlencoded']
-              .__c as OpenAPIGeneralSchema
-          );
-          newOpenAPIServiceOutput['application/x-www-form-urlencoded'].__c =
-            checkResult.content;
-          if (checkResult.isDifferent) somethingsInOutputChanged = true;
+          if (
+            Array.isArray(
+              newOpenAPIServiceOutput['application/x-www-form-urlencoded']
+            ) &&
+            Array.isArray(previousContent['application/x-www-form-urlencoded'])
+          ) {
+            for (const index in newOpenAPIServiceOutput[
+              'application/x-www-form-urlencoded'
+            ]) {
+              const checkResult = checkOpenAPIService(
+                previousContent['application/x-www-form-urlencoded'][index]
+                  .__c as OpenAPIGeneralSchema,
+                newOpenAPIServiceOutput['application/x-www-form-urlencoded'][
+                  index
+                ].__c as OpenAPIGeneralSchema
+              );
+              newOpenAPIServiceOutput['application/x-www-form-urlencoded'][
+                index
+              ].__c = checkResult.content;
+              this.logger(
+                ' -----------------> ',
+                JSON.stringify(
+                  newOpenAPIServiceOutput['application/x-www-form-urlencoded'][
+                    index
+                  ].__c
+                )
+              );
+
+              if (checkResult.isDifferent) somethingsInOutputChanged = true;
+            }
+          } else {
+            const checkResult = checkOpenAPIService(
+              (
+                previousContent[
+                  'application/x-www-form-urlencoded'
+                ] as OpenAPISchemaItem
+              ).__c as OpenAPIGeneralSchema,
+              (
+                newOpenAPIServiceOutput[
+                  'application/x-www-form-urlencoded'
+                ] as OpenAPISchemaItem
+              ).__c as OpenAPIGeneralSchema
+            );
+            (
+              newOpenAPIServiceOutput[
+                'application/x-www-form-urlencoded'
+              ] as OpenAPISchemaItem
+            ).__c = checkResult.content;
+            this.logger(
+              ' -----------------> ',
+              JSON.stringify(
+                (
+                  newOpenAPIServiceOutput[
+                    'application/x-www-form-urlencoded'
+                  ] as OpenAPISchemaItem
+                ).__c
+              )
+            );
+
+            if (checkResult.isDifferent) somethingsInOutputChanged = true;
+          }
         }
 
         let finalContent: OpenAPIServiceOutput = newOpenAPIServiceOutput;
