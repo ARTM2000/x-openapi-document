@@ -260,6 +260,12 @@ export class OpenAPIOrganizer {
           await this.adminPanelService.getSingleAPIService(method, path);
 
         if (apiServiceValue.ok && apiServiceValue.result) {
+          // remove path if it is not publicly available
+          if (!apiServiceValue.result.public) {
+            delete (openapi.paths[path] as any)[method];
+            continue;
+          }
+
           // set service description
           (openapi.paths[path] as any)[method].description =
             apiServiceValue.result.description;
