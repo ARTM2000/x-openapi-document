@@ -1,5 +1,5 @@
 import { NextApiRequest, NextApiResponse } from "next";
-import { OpenAPIOrganizer } from "../../server/openapi.service";
+import { OpenAPIOrganizer } from "../../../server/openapi.service";
 
 export default async function handler(
 	req: NextApiRequest,

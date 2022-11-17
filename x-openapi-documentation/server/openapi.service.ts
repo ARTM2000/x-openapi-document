@@ -182,6 +182,16 @@ export class OpenAPIOrganizer {
     openapiSchema.info.title = infoData.openapi_title;
     openapiSchema.info.version = infoData.openapi_version;
     openapiSchema.info.description = infoData.openapi_description;
+
+    /**
+     * check if openapi conversion to postman enabled, add link to
+     * info.description for user on client side
+     */
+    if (openapiConfig.postman.enable) {
+      this.logger('(Enable) postman conversion');
+      openapiSchema.info.description += `\n# ${openapiConfig.postman.title}\n<a href='/api/openapi/postman' download='${openapiConfig.postman.filename}.${openapiSchema.info.version}.json'>${openapiConfig.postman.linkText}</a>`;
+    }
+
     openapiSchema.info.contact = infoData.openapi_contact;
     // ?: Is license required?
     openapiSchema.info.license = { name: 'ISC' };
@@ -381,7 +391,8 @@ export class OpenAPIOrganizer {
         const targetIndex = (
           (openapi.paths[path] as any)[method] as Swagger.Operation
         ).parameters?.findIndex(
-          (header_params) => header_params.in === 'header' && header_params.name === h
+          (header_params) =>
+            header_params.in === 'header' && header_params.name === h
         );
         if (targetIndex === undefined || targetIndex < 0) {
           // !important: document content update trigger
@@ -393,7 +404,7 @@ export class OpenAPIOrganizer {
         )[targetIndex].description = headers[h].description;
       }
     }
-    
+
     if (paths) {
       for (const p of Object.keys(paths)) {
         // as openapi parameters are array, we should find each field's index to replace value
@@ -419,7 +430,8 @@ export class OpenAPIOrganizer {
         const targetIndex = (
           (openapi.paths[path] as any)[method] as Swagger.Operation
         ).parameters?.findIndex(
-          (query_params) => query_params.in === 'query' && query_params.name === q
+          (query_params) =>
+            query_params.in === 'query' && query_params.name === q
         );
         if (!targetIndex || targetIndex < 0) {
           // !important: document content update trigger
@@ -494,7 +506,7 @@ export class OpenAPIOrganizer {
 
     if (serviceInfo.parameters) {
       for (const parameter of serviceInfo.parameters) {
-        if(parameter.in === 'header') {
+        if (parameter.in === 'header') {
           serviceInput.headers = {
             ...serviceInput.headers,
             [parameter.name]: {
