@@ -21,9 +21,11 @@ import {
   openapiSecuritySchemes,
 } from '../config/openapi';
 import { AdminPanelService } from './admin-panel.service';
+import { OpenAPIExtensions, CODE_SAMPLE } from './openapi-extensions.service';
 
 export class OpenAPIOrganizer {
   private readonly adminPanelService: AdminPanelService;
+  private readonly openapiExtensions: OpenAPIExtensions;
   private readonly defaultDescription: string = '--';
   // add this response status codes with "priority". They are check from beginning
   private readonly successfulResponseStatusCodes: string[] = ['201', '200'];
@@ -39,6 +41,7 @@ export class OpenAPIOrganizer {
       );
     }
     this.adminPanelService = new AdminPanelService();
+    this.openapiExtensions = new OpenAPIExtensions();
   }
 
   async getOpenAPISchema(): Promise<string> {
@@ -172,26 +175,11 @@ export class OpenAPIOrganizer {
     openapiSchema: Swagger.SwaggerV3
   ): Promise<Swagger.SwaggerV3> {
     const infoData = await this.getInfoDataFromAdminPanel();
-    openapiSchema = await this.exchangeOpenAPIContentWithAdminPanel(
-      openapiSchema
-    );
-    openapiSchema = this.formatSecuritySchemes(openapiSchema);
-
     openapiSchema.openapi = '3.0.0';
     /* update info */
     openapiSchema.info.title = infoData.openapi_title;
     openapiSchema.info.version = infoData.openapi_version;
     openapiSchema.info.description = infoData.openapi_description;
-
-    /**
-     * check if openapi conversion to postman enabled, add link to
-     * info.description for user on client side
-     */
-    if (openapiConfig.postman.enable) {
-      this.logger('(Enable) postman conversion');
-      openapiSchema.info.description += `\n# ${openapiConfig.postman.title}\n<a href='/api/openapi/postman' download='${openapiConfig.postman.filename}.${openapiSchema.info.version}.json'>${openapiConfig.postman.linkText}</a>`;
-    }
-
     openapiSchema.info.contact = infoData.openapi_contact;
     // ?: Is license required?
     openapiSchema.info.license = { name: 'ISC' };
@@ -204,11 +192,33 @@ export class OpenAPIOrganizer {
     /* update server */
     openapiSchema.servers = [{ url: infoData.openapi_service_baseurl }];
 
+    /**
+     * check if openapi conversion to postman enabled, add link to
+     * info.description for user on client side
+     */
+    if (openapiConfig.postman.enable) {
+      this.logger('(Enable) postman conversion');
+      openapiSchema.info.description += `\n# ${openapiConfig.postman.title}\n<a href='/api/openapi/postman' download='${openapiConfig.postman.filename}.${openapiSchema.info.version}.json'>${openapiConfig.postman.linkText}</a>`;
+    }
+    /**
+     * update security schemas
+     */
+    openapiSchema = this.formatSecuritySchemes(openapiSchema);
+    /**
+     * update openapi services content with admin panel data
+     */
+    openapiSchema = await this.exchangeOpenAPIContentWithAdminPanel(
+      openapiSchema
+    );
+
     return openapiSchema;
   }
 
   private formatSecuritySchemes(openapi: Swagger.SwaggerV3): Swagger.SwaggerV3 {
-    (openapi.components as any).securitySchemes = openapiSecuritySchemes;
+    (openapi.components as any).securitySchemes = {
+      ...(openapi.components as any).securitySchemes,
+      ...openapiSecuritySchemes,
+    };
     return openapi;
   }
 
@@ -260,6 +270,47 @@ export class OpenAPIOrganizer {
     }
   }
 
+  private async createCodeSampleForAPIService(
+    openapi: Swagger.SwaggerV3,
+    path: string,
+    method: string
+  ): Promise<Swagger.SwaggerV3> {
+    const snippetsData =
+      await this.openapiExtensions.createCodeSampleFromOpenAPI(
+        openapi,
+        path,
+        method
+      );
+
+    if (!snippetsData.ok || !snippetsData.result) {
+      return openapi;
+    }
+
+    this.logger('code sample result received');
+    const codeSamples: { lang: string; label: string; source: string }[] = [];
+
+    for (const snippet of snippetsData.result.snippets) {
+      const snpt = snippet as {
+        id: string;
+        mimeType: string;
+        title: string;
+        content: string;
+      };
+
+      codeSamples.push({
+        lang: (CODE_SAMPLE[snpt.id] as any).docLang,
+        label: (CODE_SAMPLE[snpt.id] as any).docLang,
+        source: snpt.content,
+      });
+    }
+
+    (
+      (openapi.paths[path] as Swagger.Paths)[method] as Swagger.Operation as any
+    )['x-codeSamples'] = codeSamples;
+
+    return openapi;
+  }
+
   private async exchangeOpenAPIContentWithAdminPanel(
     openapi: Swagger.SwaggerV3
   ): Promise<Swagger.SwaggerV3> {
@@ -274,6 +325,14 @@ export class OpenAPIOrganizer {
           if (!apiServiceValue.result.public) {
             delete (openapi.paths[path] as any)[method];
             continue;
+          }
+          // add codeSamples
+          if (openapiConfig.codeSample.enable) {
+            openapi = await this.createCodeSampleForAPIService(
+              openapi,
+              path,
+              method
+            );
           }
 
           // set service description
@@ -336,6 +395,15 @@ export class OpenAPIOrganizer {
             service_output: apiServiceOutput,
           });
         if (newAPIService.ok && newAPIService.result) {
+          // add codeSamples
+          if (openapiConfig.codeSample.enable) {
+            openapi = await this.createCodeSampleForAPIService(
+              openapi,
+              path,
+              method
+            );
+          }
+
           // set service description
           (openapi.paths[path] as any)[method].description =
             newAPIService.result.description;

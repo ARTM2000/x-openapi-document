@@ -11,6 +11,9 @@ export const openapiConfig = {
     filename: 'smart-school.postman-collection',
     linkText: 'دانلود کالکشن پست من',
   },
+  codeSample: {
+    enable: true,
+  }
 };
 
 export const openapiSourceList: OpenApiSource[] = [
