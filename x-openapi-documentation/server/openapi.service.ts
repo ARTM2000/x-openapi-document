@@ -193,6 +193,10 @@ export class OpenAPIOrganizer {
     openapiSchema.servers = [{ url: infoData.openapi_service_baseurl }];
 
     /**
+     * update security schemas
+     */
+    openapiSchema = this.formatSecuritySchemes(openapiSchema);
+    /**
      * check if openapi conversion to postman enabled, add link to
      * info.description for user on client side
      */
@@ -200,10 +204,6 @@ export class OpenAPIOrganizer {
       this.logger('(Enable) postman conversion');
       openapiSchema.info.description += `\n# ${openapiConfig.postman.title}\n<a href='/api/openapi/postman' download='${openapiConfig.postman.filename}.${openapiSchema.info.version}.json'>${openapiConfig.postman.linkText}</a>`;
     }
-    /**
-     * update security schemas
-     */
-    openapiSchema = this.formatSecuritySchemes(openapiSchema);
     /**
      * update openapi services content with admin panel data
      */
