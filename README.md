@@ -16,7 +16,6 @@ The project heavily relies on [OpenAPI schema standard](https://spec.openapis.or
   - [Add new source](#add-new-source)
   - [Add new security schemes](#add-new-security-schemes)
   - [Last Note](#last-note)
-- [Happy Coding!](#happy-coding)
 
 
 ## Technologies in use
@@ -157,7 +156,3 @@ export const openapiSecuritySchemes: {
        |- index.ts
     
 ```
-
-
-# Happy Coding!
-This project created by effort of finnotech developers. To the moon 🚀
